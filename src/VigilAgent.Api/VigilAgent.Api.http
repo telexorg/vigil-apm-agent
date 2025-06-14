@@ -1,0 +1,6 @@
+@vigil_HostAddress = http://localhost:5181
+
+GET {{vigil_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

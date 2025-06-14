@@ -1,0 +1,65 @@
+# Build results
+bin/
+obj/
+out/
+*.dll
+*.exe
+*.app
+*.pdb
+
+# Visual Studio
+.vscode/
+.vs/
+*.user
+*.suo
+*.sln.docstates
+
+# Rider
+.idea/
+
+# ASP.NET runtime files
+wwwroot/node_modules/
+wwwroot/dist/
+
+# Configuration
+appsettings.Development.json
+appsettings.Local.json
+appsettings.*.json
+
+# User secrets
+secrets.json
+
+# Logs
+*.log
+logs/
+Logs/
+
+# Test results
+TestResults/
+*.trx
+
+# Coverage results
+coverage/
+*.coverage
+*.coveragexml
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+
+# Others
+*.swp
+*.bak
+*.tmp
+
+# Optional: for JetBrains Rider / ReSharper
+_ReSharper*/
+*.DotSettings.user
+
+.env
+.env.*
