@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using VigilAgent.Api.Models;
 using VigilAgent.Apm.Instrumentation;
 using VigilAgent.Apm.Telemetry;
 
@@ -15,11 +16,11 @@ namespace VigilAgent.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var junk = new List<byte[]>();
-            for (int i = 0; i < 10000; i++)
-            {
-                junk.Add(new byte[1024 * 50]); // 50 KB
-            }
+            //var junk = new List<byte[]>();
+            //for (int i = 0; i < 10000; i++)
+            //{
+            //    junk.Add(new byte[1024 * 50]); // 50 KB
+            //}
 
             if (n % 2 == 0)
             {
@@ -53,18 +54,18 @@ namespace VigilAgent.Api.Controllers
                 switch (type)
                 {
                     case "trace":
-                        var trace = item.Deserialize<TelemetryEvent>(options);
+                        var trace = item.Deserialize<Trace>(options);
                         Console.WriteLine($"[Batch] {trace.TraceId} trace - {trace.Path} = {trace.StatusCode} in {trace.DurationMs}ms");
                         break;
 
                     case "error":
-                        var error = item.Deserialize<ErrorDetail>(options);
+                        var error = item.Deserialize<Error>(options);
                         Console.WriteLine($"[Batch] {error.TraceId} exception - {error.Url} = {error.StatusCode} at {error.Timestamp}");
                         Console.WriteLine($"        ✖ {error.ExceptionType}: {error.Message}");
                         break;
 
                     case "metrics":
-                        var metrics = item.Deserialize<RuntimeMetrics>(options);
+                        var metrics = item.Deserialize<Metric>(options);
                         Console.WriteLine($"[Batch] metrics - CPU: {metrics.CpuUsagePercent}%, Mem: {metrics.MemoryUsageBytes / 1024 / 1024}MB, GC0: {metrics.Gen0Collections}");
                         break;
 
