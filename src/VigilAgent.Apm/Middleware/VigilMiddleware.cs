@@ -74,7 +74,7 @@ namespace VigilAgent.Apm.Middleware
                 context.Response.StatusCode = status;
                 context.Response.ContentType = "application/json";
 
-                Console.WriteLine($"[Vigil EX] [{error.TraceId}] exception {context.Request.Method} {context.Request.Path} -> {status} in {error.OccurredAt}ms");
+                Console.WriteLine($"[Vigil EX] [{error.TraceId}] error {context.Request.Method} {context.Request.Path} -> {status} in {error.OccurredAt}ms");
 
 
                 // Re-throw so ASP.NET shows correct error

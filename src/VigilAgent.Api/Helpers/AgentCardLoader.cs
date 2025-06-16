@@ -11,7 +11,7 @@ namespace VigilAgent.Api.Helpers
             {
                 Name = "Vigil Observability Agent",
                 Description = "Vigil helps you monitor and analyze your app by receiving logs, errors, and metrics, then interacting via chat to provide insights and recommendations.",
-                Url = "https://vigi-apm-agent.onrender.com/api/v1", 
+                Url = "https://vigil-apm-agent.onrender.com/api/v1", 
                 IconUrl = "https://res.cloudinary.com/demo/image/upload/v1695555555/vigil-icon.png",
                 DocumentationUrl = "https://your-agent-docs.com",
                 Capabilities = new Capability

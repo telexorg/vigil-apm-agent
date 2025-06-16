@@ -42,7 +42,7 @@ app.UseMiddleware<ExceptionHandler>();
 app.UseMiddleware<VigilMiddleware>();
 //app.UseMiddleware<ExceptionMiddleware>();
 
-//app.UseMiddleware<RequestLoggingMiddleware>();
+app.UseMiddleware<RequestLoggingMiddleware>();
 
 //app.UseHttpsRedirection();
 
