@@ -48,10 +48,12 @@ namespace VigilAgent.Api.Middleware
                     _logger.LogError(ex, "❌ JSON Parsing Error - Malformed request body. Logging raw body.");
                 }
 
-                _logger.LogInformation($"🔍 Incoming Request: {request.Method} {request.Path}");
-                _logger.LogInformation($"📌 Headers: {headers}");
-                _logger.LogInformation($"📌 Query Parameters: {queryParams}");
-                _logger.LogInformation($"📌 Body: {formattedBody}");
+                _logger.LogInformation($"======================================================================================" +
+                    $"\n🔍 Incoming Request: {request.Method} {request.Path}\n" +
+                    $"📌 Headers: {headers}\n" +
+                    $"📌 Query Parameters: {queryParams}\n" +
+                    $"📌 Body: {formattedBody}\n" +
+                    $"=======================================================================================");
 
                 await _next(context);
             }

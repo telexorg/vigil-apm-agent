@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Security.Authentication;
@@ -33,7 +34,7 @@ namespace VigilAgent.Apm.Middleware
 
             var traceId = Guid.NewGuid().ToString();
             TraceContext.TraceId = traceId;
-
+            Console.WriteLine($"[Vigil] [{traceId}] trace {context.Request.Method} {context.Request.Path} -> in progress...");
             var stopwatch = Stopwatch.StartNew();
             MetricsCollector.Start();
 

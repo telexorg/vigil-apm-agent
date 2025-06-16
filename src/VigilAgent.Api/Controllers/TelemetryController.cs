@@ -8,7 +8,7 @@ using VigilAgent.Apm.Telemetry;
 
 namespace VigilAgent.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/[controller]")]
     [ApiController]
     public class TelemetryController : ControllerBase
     {
