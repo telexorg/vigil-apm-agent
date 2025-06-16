@@ -26,7 +26,7 @@ namespace VigilAgent.Apm.Middleware
 
         public async Task InvokeAsync(HttpContext context)
         {
-            if (context.Request.Path.StartsWithSegments("/api/Telemetry") && context.Request.Method.Equals(HttpMethod.Post))
+            if (context.Request.Path.StartsWithSegments("/api/v1/Telemetry") && context.Request.Method.Equals(HttpMethod.Post))
             {
                 await _next(context); // Don't trace export calls
                 return;
@@ -104,6 +104,7 @@ namespace VigilAgent.Apm.Middleware
                 Console.WriteLine($"[Vigil] [{traceId}] {evt.Type} {method} {path} -> {statusCode} in {duration}ms");
 
                 TraceContext.Clear();
+                MetricsCollector.Collect();
 
             }
         }
