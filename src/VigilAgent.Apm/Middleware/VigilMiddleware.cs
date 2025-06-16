@@ -26,7 +26,7 @@ namespace VigilAgent.Apm.Middleware
 
         public async Task InvokeAsync(HttpContext context)
         {
-            if (context.Request.Path.StartsWithSegments("/api/v1/Telemetry") && context.Request.Method.Equals(HttpMethod.Post))
+            if (context.Request.Path.StartsWithSegments("/api/v1/Telemetry") && context.Request.Method.Equals("POST", StringComparison.OrdinalIgnoreCase))
             {
                 await _next(context); // Don't trace export calls
                 return;
