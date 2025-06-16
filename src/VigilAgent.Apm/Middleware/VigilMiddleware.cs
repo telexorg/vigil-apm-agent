@@ -35,8 +35,10 @@ namespace VigilAgent.Apm.Middleware
             var traceId = Guid.NewGuid().ToString();
             TraceContext.TraceId = traceId;
             Console.WriteLine($"[Vigil] [{traceId}] trace {context.Request.Method} {context.Request.Path} -> in progress...");
+
             var stopwatch = Stopwatch.StartNew();
             MetricsCollector.Start();
+            TelemetryFlusher.Start();
 
             try
             {
@@ -102,6 +104,8 @@ namespace VigilAgent.Apm.Middleware
                 Console.WriteLine($"[Vigil] [{traceId}] {evt.Type} {method} {path} -> {statusCode} in {duration}ms");
 
                 TraceContext.Clear();
+                MetricsCollector.Collect();
+
             }
         }
 

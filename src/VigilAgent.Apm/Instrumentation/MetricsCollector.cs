@@ -5,7 +5,7 @@ namespace VigilAgent.Apm.Instrumentation
 {
     public class MetricsCollector
     {
-        private static readonly Timer _metricsTimer;
+        public static readonly Timer _metricsTimer;
         private static readonly Process _currentProcess = Process.GetCurrentProcess();
         private static DateTime _lastCheckTime = DateTime.UtcNow;
         private static TimeSpan _lastCpuTime = _currentProcess.TotalProcessorTime;
@@ -17,14 +17,14 @@ namespace VigilAgent.Apm.Instrumentation
 
         static MetricsCollector()
         {
-            _metricsTimer = new Timer(50000);
+            _metricsTimer = new Timer(600000);
             _metricsTimer.Elapsed += (_, _) => Collect();
             _metricsTimer.AutoReset = true;
         }
 
         public static void Start() => _metricsTimer.Start();
 
-        private static void Collect()
+        public static void Collect()
         {
             _currentProcess.Refresh();
 
@@ -63,6 +63,7 @@ namespace VigilAgent.Apm.Instrumentation
             Telemetry.TelemetryBuffer.Add(metrics);
 
             Console.WriteLine($"""
+
             [Metrics]
               🕒 Timestamp     : {DateTime.Now}
               🔁 CPU Usage     : {metrics.CpuUsagePercent}%
@@ -70,6 +71,7 @@ namespace VigilAgent.Apm.Instrumentation
               ♻️ GC Total      : Gen0={metrics.Gen0Collections}, Gen1={metrics.Gen1Collections}, Gen2={metrics.Gen2Collections}
               🧮 GC Deltas     : ΔGen0={metrics.DeltaGen0}, ΔGen1={metrics.DeltaGen1}, ΔGen2={metrics.DeltaGen2}
               🧵 Threads       : Worker={metrics.AvailableWorkerThreads}, IO={metrics.AvailableIOThreads}
+
             """);
         }
 

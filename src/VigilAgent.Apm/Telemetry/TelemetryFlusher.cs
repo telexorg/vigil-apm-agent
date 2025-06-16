@@ -14,8 +14,10 @@ namespace VigilAgent.Apm.Telemetry
             _flushTimer = new Timer(5000);
             _flushTimer.Elapsed += (_, _) => Flush();
             _flushTimer.AutoReset = true;
-            //_flushTimer.Start();
         }
+
+        public static void Start() => _flushTimer.Start();
+        
 
         public static async void Flush()
         {
