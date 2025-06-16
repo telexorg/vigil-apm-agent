@@ -8,6 +8,7 @@
         public string Version { get; set; } = "";
         public string IconUrl { get; set; } = "";
         public string DocumentationUrl { get; set; } = "";
+        public bool IsPaid { get; set; }  = false;
         public Capability Capabilities { get; set; }
         public string[] DefaultInputModes { get; set; }
         public string[] DefaultOutputModes { get; set; }
