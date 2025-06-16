@@ -104,7 +104,6 @@ namespace VigilAgent.Apm.Middleware
                 Console.WriteLine($"[Vigil] [{traceId}] {evt.Type} {method} {path} -> {statusCode} in {duration}ms");
 
                 TraceContext.Clear();
-                MetricsCollector.Collect();
 
             }
         }
