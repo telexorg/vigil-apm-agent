@@ -14,6 +14,7 @@ namespace VigilAgent.Apm.Telemetry
         public string  Method { get; set; }
         public int StatusCode { get; set; }
         public long DurationMs { get; set; }
+        public bool isError { get; set; } = false;
 
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
     }

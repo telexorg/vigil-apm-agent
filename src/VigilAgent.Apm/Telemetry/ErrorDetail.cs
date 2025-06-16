@@ -20,10 +20,10 @@ namespace VigilAgent.Apm.Telemetry
         public long OccurredAt { get; set; }
 
         public string HttpMethod { get; set; }
-        public string Url { get; set; }                 // Use string instead of PathString for serialization
+        public string Url { get; set; }                
         public int StatusCode { get; set; }
 
-        public string Source { get; set; }              // Optional: where the error occurred (e.g., controller name)
-        public string Application { get; set; }         // Optional: useful if the agent supports multi-app tracking
+        public string Source { get; set; }              // Optional: where the error occurred 
+        public string Application { get; set; }         // Optional: For multi-app tracking
     }
 }

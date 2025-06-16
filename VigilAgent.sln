@@ -9,8 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VigilAgent.Apm", "src\Vigil
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VigilAgent.Tests", "tests\VigilAgent.Tests\VigilAgent.Tests.csproj", "{61123267-9D6F-4111-954D-4ACC8D0B3E29}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VigilAgent.TestHost", "src\VigilAgent.TestHost\VigilAgent.TestHost.csproj", "{A62A0CD0-7861-4800-A3D8-2EAA86AC4A55}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
@@ -34,10 +32,6 @@ Global
 		{61123267-9D6F-4111-954D-4ACC8D0B3E29}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{61123267-9D6F-4111-954D-4ACC8D0B3E29}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{61123267-9D6F-4111-954D-4ACC8D0B3E29}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A62A0CD0-7861-4800-A3D8-2EAA86AC4A55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A62A0CD0-7861-4800-A3D8-2EAA86AC4A55}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A62A0CD0-7861-4800-A3D8-2EAA86AC4A55}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A62A0CD0-7861-4800-A3D8-2EAA86AC4A55}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

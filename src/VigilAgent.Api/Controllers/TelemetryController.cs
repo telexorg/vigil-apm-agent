@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using VigilAgent.Api.Models;
+using VigilAgent.Api.Services;
 using VigilAgent.Apm.Instrumentation;
 using VigilAgent.Apm.Telemetry;
 
@@ -37,6 +38,11 @@ namespace VigilAgent.Api.Controllers
             if (batch.ValueKind != JsonValueKind.Array || batch.GetArrayLength() == 0)
                 return BadRequest("Invalid or empty batch");
 
+            var options = new JsonSerializerOptions()
+            {
+                PropertyNameCaseInsensitive = true,
+            };
+
             foreach (var item in batch.EnumerateArray())
             {
                 if (!item.TryGetProperty("type", out var typeProperty))
@@ -47,26 +53,35 @@ namespace VigilAgent.Api.Controllers
 
                 var type = typeProperty.GetString();
 
-                var options = new JsonSerializerOptions()
-                {
-                    PropertyNameCaseInsensitive = true,
-                };
                 switch (type)
                 {
                     case "trace":
                         var trace = item.Deserialize<Trace>(options);
-                        Console.WriteLine($"[Batch] {trace.TraceId} trace - {trace.Path} = {trace.StatusCode} in {trace.DurationMs}ms");
+                        if (trace != null)
+                        {
+                            TelemetryService.Traces[trace.TraceId] = trace;
+                            Console.WriteLine($"[Batch] {trace.TraceId} trace - {trace.Path} = {trace.StatusCode} in {trace.DurationMs}ms");
+                        }
                         break;
 
                     case "error":
-                        var error = item.Deserialize<Error>(options);
-                        Console.WriteLine($"[Batch] {error.TraceId} exception - {error.Url} = {error.StatusCode} at {error.Timestamp}");
-                        Console.WriteLine($"        ✖ {error.ExceptionType}: {error.Message}");
+                        var error = item.Deserialize<ErrorDetail>(options);
+                        if (error != null)
+                        {
+                            TelemetryService.Errors[error.TraceId] = error;
+                            Console.WriteLine($"[Batch] {error.TraceId} exception - {error.Url} = {error.StatusCode} at {error.Timestamp}");
+                            Console.WriteLine($"        ✖ {error.ExceptionType}: {error.Message}");
+                        }
                         break;
 
                     case "metrics":
                         var metrics = item.Deserialize<Metric>(options);
-                        Console.WriteLine($"[Batch] metrics - CPU: {metrics.CpuUsagePercent}%, Mem: {metrics.MemoryUsageBytes / 1024 / 1024}MB, GC0: {metrics.Gen0Collections}");
+                        if (metrics != null)
+                        {
+                            var id = Guid.NewGuid().ToString();
+                            TelemetryService.Metrics[id] = metrics;
+                            Console.WriteLine($"[Batch] metrics - CPU: {metrics.CpuUsagePercent}%, Mem: {metrics.MemoryUsageBytes / 1024 / 1024}MB, GC0: {metrics.Gen0Collections}");
+                        }
                         break;
 
                     default:
@@ -77,5 +92,6 @@ namespace VigilAgent.Api.Controllers
 
             return Ok();
         }
+
     }
 }

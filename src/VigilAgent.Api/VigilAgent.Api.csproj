@@ -14,8 +14,4 @@
     <ProjectReference Include="..\VigilAgent.Apm\VigilAgent.Apm.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Configuration\" />
-  </ItemGroup>
-
 </Project>

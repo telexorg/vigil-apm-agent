@@ -14,7 +14,7 @@ namespace VigilAgent.Apm.Telemetry
             _flushTimer = new Timer(5000);
             _flushTimer.Elapsed += (_, _) => Flush();
             _flushTimer.AutoReset = true;
-            _flushTimer.Start();
+            //_flushTimer.Start();
         }
 
         public static async void Flush()
@@ -24,7 +24,7 @@ namespace VigilAgent.Apm.Telemetry
 
             await TelemetrySender.ExportAsync(batch);
 
-            //foreach (var item in batch)
+            /*//foreach (var item in batch)
             //{
             //    switch (item)
             //    {
@@ -42,7 +42,7 @@ namespace VigilAgent.Apm.Telemetry
             //            break;
 
             //    }
-            //}
+            //}*/
         }
 
     }

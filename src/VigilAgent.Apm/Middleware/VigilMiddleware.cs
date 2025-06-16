@@ -25,7 +25,7 @@ namespace VigilAgent.Apm.Middleware
 
         public async Task InvokeAsync(HttpContext context)
         {
-            if (context.Request.Path.StartsWithSegments("/api/Telemetry"))
+            if (context.Request.Path.StartsWithSegments("/api/Telemetry") && context.Request.Method.Equals(HttpMethod.Post))
             {
                 await _next(context); // Don't trace export calls
                 return;
@@ -93,7 +93,8 @@ namespace VigilAgent.Apm.Middleware
                     Method = method,
                     Path = path,
                     StatusCode = statusCode,
-                    DurationMs = duration
+                    DurationMs = duration,
+                    isError = -statusCode != StatusCodes.Status200OK
                 };
                 TelemetryBuffer.Add(evt);
 
