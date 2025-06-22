@@ -1,6 +1,5 @@
 ﻿using System.Reflection.Metadata;
 using VigilAgent.Api.Commons;
-using VigilAgent.Api.Data;
 using VigilAgent.Api.Models;
 
 namespace VigilAgent.Api.IRepositories

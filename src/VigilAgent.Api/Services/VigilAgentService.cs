@@ -9,11 +9,11 @@ using VigilAgent.Api.Dtos;
 
 namespace VigilAgent.Api.Services
 {
-    public class VigilAgent
+    public class VigilAgentService : IVigilAgentService
     {
         //private static readonly ConcurrentDictionary<string, List<ChatMessage>> conversations = new(); // Group messages by channelId
 
-        private ILogger<VigilAgent> _logger;
+        private ILogger<VigilAgentService> _logger;
         private readonly IRequestProcessingService _requestService;
         private readonly IConversationRepository _messageRepository;
         private readonly IAIService _aiService;
@@ -22,7 +22,20 @@ namespace VigilAgent.Api.Services
 
         private readonly RequestRouter _router;
 
-        public VigilAgent()
+        //public VigilAgent()
+        //{
+        //    var handlers = new Dictionary<string, IAgentCommandHandler>
+        //    {
+        //        { "show-logs", new ShowLogsHandler() },
+        //        { "explain-errors", new ExplainErrorsHandler() },
+        //        { "show-metrics", new ShowRuntimeMetrics() },
+        //        { "recommend-fix", new RecommendFixHandler() }
+        //    };
+
+        //    _router = new RequestRouter(handlers);
+        //}
+
+        public VigilAgentService(ILogger<VigilAgentService> logger, IRequestProcessingService requestService, IConversationRepository messageRepository, IAIService aiRepository, HttpHelper httpHelper)
         {
             var handlers = new Dictionary<string, IAgentCommandHandler>
             {
@@ -32,16 +45,14 @@ namespace VigilAgent.Api.Services
                 { "recommend-fix", new RecommendFixHandler() }
             };
 
-            _router = new RequestRouter(handlers);
-        }
-
-        public VigilAgent(ILogger<VigilAgent> logger, IRequestProcessingService requestService, IConversationRepository messageRepository, IAIService aiRepository, HttpHelper httpHelper)
-        {
             _requestService = requestService;
             _logger = logger;
             _messageRepository = messageRepository;
             _aiService = aiRepository;
             _httpHelper = httpHelper;
+
+
+            _router = new RequestRouter(handlers);
         }       
 
        
@@ -51,10 +62,20 @@ namespace VigilAgent.Api.Services
             try
             {
                 var newTaskRequest = TelemetryTask.ExtractTaskData(taskRequest);
-                            
-                string response = await _router.RouteAsync(newTaskRequest.Message);
 
-                return DataExtract.ConstructResponse(taskRequest, response);
+                string responseContext = await _router.RouteAsync(newTaskRequest.Message);
+
+                if (string.IsNullOrEmpty(responseContext))
+                {
+                    _logger.LogWarning("No handler found for the command: {Command}", newTaskRequest.Message);
+                    return DataExtract.ConstructResponse(taskRequest, "No handler found for the command.");
+                }
+
+                _logger.LogInformation("Routing request to handler: {Handler}", responseContext);
+                var intent = await _aiService.Chat(newTaskRequest.Message, responseContext);
+
+
+                return DataExtract.ConstructResponse(taskRequest, intent);
 
             }
             catch (Exception ex)

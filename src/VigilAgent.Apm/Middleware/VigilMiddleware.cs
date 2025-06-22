@@ -97,7 +97,7 @@ namespace VigilAgent.Apm.Middleware
                     Path = path,
                     StatusCode = statusCode,
                     DurationMs = duration,
-                    isError = -statusCode != StatusCodes.Status200OK
+                    isError = statusCode != StatusCodes.Status200OK
                 };
                 TelemetryBuffer.Add(evt);
 

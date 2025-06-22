@@ -14,13 +14,13 @@ namespace VigilAgent.Api.Controllers
     {
         private readonly IAgentCommandHandler _commandHandler;
         private ILogger<TelexController> _logger;
-        private readonly Services.VigilAgent _agent;
+        private readonly IVigilAgentService _agent;
 
-        public TelexController(IAgentCommandHandler blogService, ILogger<TelexController> logger)
+        public TelexController(IAgentCommandHandler blogService, ILogger<TelexController> logger, IVigilAgentService agent)
         {
             _commandHandler = blogService;
             _logger = logger;
-            _agent = new();
+            _agent = agent;
         }
 
         [HttpGet(".well-known/agent.json")]
@@ -46,7 +46,7 @@ namespace VigilAgent.Api.Controllers
         {
             _logger.LogInformation($"Task request received: {JsonSerializer.Serialize(taskRequest.Id)}");
 
-            ValidationHelper.ValidateRequest(taskRequest);           
+            //ValidationHelper.ValidateRequest(taskRequest);           
 
             var response = await _agent.HandleUserInput(taskRequest);
 

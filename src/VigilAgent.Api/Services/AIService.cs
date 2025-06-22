@@ -6,29 +6,37 @@ using VigilAgent.Api.Helpers;
 using VigilAgent.Api.Commons;
 using BloggerAgent.Domain.Commons;
 using VigilAgent.Api.Models;
+using VigilAgent.Api.Middleware;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.Connectors.Google;
 
 namespace VigilAgent.Api.Services
 {
     public class AIService : IAIService
     {
-        private ILogger<VigilAgent> _logger;
+        private ILogger<VigilAgentService> _logger;
         private readonly string _apiKey;
         private readonly string _baseUrl;
         private readonly IConversationRepository _messageRepository;
         private readonly HttpHelper _httpHelper;
 
+        private readonly KernelProvider _kernelProvider;
 
-        public AIService(IOptions<TelexApiSettings> dataConfig, IOptions<TelexApiSettings> telexSettings, ILogger<VigilAgent> logger, IConversationRepository messageRepository, HttpHelper httpHelper)
+     
+        public AIService(IOptions<TelexApiSettings> dataConfig, KernelProvider kernelProvider, IOptions<TelexApiSettings> telexSettings, ILogger<VigilAgentService> logger, IConversationRepository messageRepository, HttpHelper httpHelper)
         {
             _apiKey = dataConfig.Value.ApiKey;
             _baseUrl = dataConfig.Value.BaseUrl;
             _logger = logger;
             _messageRepository = messageRepository;
             _httpHelper = httpHelper;
+            _kernelProvider = kernelProvider;
         }
         public async Task<string> GenerateResponse(string message, string systemMessage, TelemetryTask task)
         {
-            var messages = new List<TelexChatMessage>()
+            var chatHistory = new List<TelexChatMessage>()
             {
                 new TelexChatMessage() { Role = Roles.System, Content = systemMessage }
             };
@@ -37,15 +45,18 @@ namespace VigilAgent.Api.Services
 
             if (conversations.Count > 0 || conversations != null)
             {
-                messages.AddRange(conversations);
+                chatHistory.AddRange(conversations);
             }
+            
+            await AddMessageAsync(message, task, "user");
 
-            messages.Add(new TelexChatMessage { Role = "user", Content = message });
+
+            chatHistory.Add(new TelexChatMessage { Role = "user", Content = message });
 
             var apiRequest = new ApiRequest()
             {
                 Url = $"{_baseUrl}/telexai/chat",
-                Body = new { messages },
+                Body = new { chatHistory },
                 Method = HttpMethod.Post,
                 Headers = new Dictionary<string, string>
                 {
@@ -72,26 +83,71 @@ namespace VigilAgent.Api.Services
 
             string generatedResponse = generatedData.Data.Messages.Content;
 
-            await AddNewMessagesAsync(message, task, generatedResponse);
+            await AddMessageAsync(generatedResponse, task, "assistant");
 
             return generatedResponse;
         }
 
-        private async Task AddNewMessagesAsync(string message, TelemetryTask blogDto, string generatedResponse)
+        private async Task AddMessageAsync(string message, TelemetryTask task, string role)
         {
-            var newMessages = new List<Message>()
-            {
-                new Message { Id = Guid.NewGuid().ToString(), Content = message, TaskId = blogDto.TaskId, ContextId = blogDto.ContextId, Role = Roles.User },
-                new Message() { Id = Guid.NewGuid().ToString(), Content = generatedResponse, TaskId = blogDto.TaskId, ContextId = blogDto.ContextId, Role = Roles.Assistant }
-            };
-
-            foreach (Message newMessage in newMessages)
-            {
+            var newMessage =
+                new Message { Id = Guid.NewGuid().ToString(), Content = message, TaskId = task.TaskId, ContextId = task.ContextId, Role = role };
+                          
                 bool isAdded = await _messageRepository.CreateAsync(newMessage);
 
                 if (!isAdded)
                     _logger.LogInformation($"Failed to add {newMessage.Role} message to database");
-            }
+           
+        }
+
+        public async Task<string> Chat(string request, string responseContext)
+        {
+            var kernel = _kernelProvider.Kernel;
+            var chatService = _kernelProvider.ChatCompletionService;
+
+            // Build ChatHistory
+            var history = new ChatHistory();
+
+            var systemMessage = PromptBuilder.BuildUserResponsePrompt(request,responseContext);
+
+            history.AddSystemMessage(systemMessage);
+
+            // Restore prior conversation (if any)
+            //if (history.Count > 0)
+            //{
+            //    foreach (var item in history)
+            //    {
+            //        history.AddMessage(item.Role, item.Content);
+            //    }
+            //}
+
+            // Add current user message
+            history.AddUserMessage(request);
+
+            // Settings
+            //GeminiPromptExecutionSettings executionSettings = new()
+            //{
+            //    FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(),
+            //};
+
+            // Get AI reply
+            var result = await chatService.GetChatMessageContentAsync(
+                history
+                //executionSettings: executionSettings,
+                //kernel: kernel
+            );
+
+            // Add AI reply to history
+            history.AddMessage(result.Role, result.Content ?? string.Empty);
+
+            // Return response with updated history
+            var response = new 
+            {
+                Reply = result.Content ?? "",
+                History = history.Select(m => new TelexChatMessage { Role = m.Role.ToString(), Content = m.Content ?? "" }).ToList()
+            };
+
+            return result.Content;
         }
     }
 }

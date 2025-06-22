@@ -13,12 +13,12 @@ namespace VigilAgent.Apm.Telemetry
         private const int MaxBatchSize = 10;
 
 
-        public static void Add(object evt)
+        public static async Task Add(object evt)
         {
             _buffer.Enqueue(evt);
 
                 if (_buffer.Count >= MaxBatchSize)
-                TelemetryFlusher.Flush();
+                await TelemetryFlusher.Flush();
         }
 
         public static List<object> DrainBatch()

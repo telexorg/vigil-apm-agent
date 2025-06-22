@@ -14,7 +14,7 @@ namespace VigilAgent.Apm.Transport
         private static readonly HttpClient _httpClient = new HttpClient();
 
         // Could be loaded from config/env
-        private static readonly string _endpoint = "https://vigil-apm-agent.onrender.com/api/v1/Telemetry";
+        private static readonly string _endpoint = "https://localhost:7116/api/v1/Telemetry";
 
         public static async Task ExportAsync(List<object> events)
         {

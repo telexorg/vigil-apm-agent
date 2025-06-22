@@ -14,6 +14,8 @@ public class RequestRouter
 
     public async Task<string> RouteAsync(string message)
     {
+        var messageIntent = 
+
         message = message.ToLowerInvariant();
 
         if (Regex.IsMatch(message, @"logs|requests|traces"))

@@ -1,4 +1,6 @@
 ﻿using System.Collections.Concurrent;
+using System.Text.Json;
+using VigilAgent.Api.Helpers;
 using VigilAgent.Api.IServices;
 using VigilAgent.Api.Models;
 using VigilAgent.Api.Services;
@@ -24,7 +26,7 @@ namespace VigilAgent.Api.Services
     // ExplainErrorsHandler.cs
     public class ExplainErrorsHandler : IAgentCommandHandler
     {
-        public Task<string> HandleAsync(string message)
+        public async Task<string> HandleAsync(string message)
         {
             var errors = TelemetryService.Errors.Values
                 .OrderByDescending(e => e.Timestamp)
@@ -41,7 +43,18 @@ namespace VigilAgent.Api.Services
                 ? "🚨 **Recent Errors**\n\n" + string.Join("\n\n", errors)
                 : "No errors recorded.";
 
-            return Task.FromResult(response);
+            //if (TelemetryService.Errors.Count > 1000)
+            //{
+            //    var oldErrors = TelemetryService.Errors.Values.ToList();
+
+            //    // Persist to file (append mode)
+            //    await TelemetryFileStore.AppendBatchAsync(oldErrors);
+
+            //    // Trim or clear after persistence
+            //    TelemetryService.Errors.Clear();
+            //}
+
+            return await Task.FromResult(JsonSerializer.Serialize(errors));
         }
 
         private static string TrimStack(string stackTrace, int lines = 3)

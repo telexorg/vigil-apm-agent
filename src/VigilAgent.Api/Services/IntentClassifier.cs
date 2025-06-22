@@ -24,8 +24,7 @@ namespace VigilAgent.Api.Services
         public RequestProcessingService(ITelexRepository<Organization> companyRepository)
         {
             _companyRepository = companyRepository;
-        }
-       
+        }       
 
         public async Task<Request> ProcessUserInputAsync(TelemetryTask taskRequest)
         {

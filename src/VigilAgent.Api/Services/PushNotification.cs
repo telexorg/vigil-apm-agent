@@ -9,13 +9,13 @@ namespace VigilAgent.Api.Services
 {
     public class PushNotification
     {
-        private ILogger<VigilAgent> _logger;
+        private ILogger<VigilAgentService> _logger;
         private string _webhookUrl;
         private readonly HttpHelper _httpHelper;
 
             
 
-        public PushNotification(IOptions<TelexApiSettings> telexSettings, ILogger<VigilAgent> logger, HttpHelper httpHelper)
+        public PushNotification(IOptions<TelexApiSettings> telexSettings, ILogger<VigilAgentService> logger, HttpHelper httpHelper)
         {
             _webhookUrl = telexSettings.Value.WebhookUrl;            
             _logger = logger;
