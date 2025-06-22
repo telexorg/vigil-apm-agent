@@ -4,11 +4,11 @@ using System.Text.Json;
 
 namespace VigilAgent.Api.Middleware
 {
-    public class RequestLoggingMiddleware
+    public class RequestHandler
     {
         private readonly RequestDelegate _next;
-        private readonly ILogger<RequestLoggingMiddleware> _logger;
-        public RequestLoggingMiddleware(RequestDelegate next, ILogger<RequestLoggingMiddleware> logger)
+        private readonly ILogger<RequestHandler> _logger;
+        public RequestHandler(RequestDelegate next, ILogger<RequestHandler> logger)
         {
             _next = next;
             _logger = logger;

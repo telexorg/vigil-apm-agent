@@ -14,7 +14,7 @@ namespace VigilAgent.Api.Services
         //private static readonly ConcurrentDictionary<string, List<ChatMessage>> conversations = new(); // Group messages by channelId
 
         private ILogger<VigilAgentService> _logger;
-        private readonly IRequestProcessingService _requestService;
+        private readonly IIntentClassifier _requestService;
         private readonly IConversationRepository _messageRepository;
         private readonly IAIService _aiService;
         private readonly HttpHelper _httpHelper;
@@ -35,9 +35,9 @@ namespace VigilAgent.Api.Services
         //    _router = new RequestRouter(handlers);
         //}
 
-        public VigilAgentService(ILogger<VigilAgentService> logger, IRequestProcessingService requestService, IConversationRepository messageRepository, IAIService aiRepository, HttpHelper httpHelper)
+        public VigilAgentService(ILogger<VigilAgentService> logger, IIntentClassifier requestService, IConversationRepository messageRepository, IAIService aiRepository, HttpHelper httpHelper)
         {
-            var handlers = new Dictionary<string, IAgentCommandHandler>
+            var handlers = new Dictionary<string, ITelemetryHandler>
             {
                 { "show-logs", new ShowLogsHandler() },
                 { "explain-errors", new ExplainErrorsHandler() },
@@ -61,7 +61,7 @@ namespace VigilAgent.Api.Services
         {
             try
             {
-                var newTaskRequest = TelemetryTask.ExtractTaskData(taskRequest);
+                var newTaskRequest = DataExtract.ExtractTaskData(taskRequest);
 
                 string responseContext = await _router.RouteAsync(newTaskRequest.Message);
 

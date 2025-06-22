@@ -1,13 +1,13 @@
 ﻿using System.Text.RegularExpressions;
 using VigilAgent.Api.IServices;
 
-namespace VigilAgent.Api.Services;
+namespace VigilAgent.Api.Helpers;
 
 public class RequestRouter
 {
-    private readonly Dictionary<string, IAgentCommandHandler> _handlers;
+    private readonly Dictionary<string, ITelemetryHandler> _handlers;
 
-    public RequestRouter(Dictionary<string, IAgentCommandHandler> handlers)
+    public RequestRouter(Dictionary<string, ITelemetryHandler> handlers)
     {
         _handlers = handlers;
     }

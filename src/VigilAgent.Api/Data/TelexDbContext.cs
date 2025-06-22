@@ -4,8 +4,8 @@ using Microsoft.Extensions.Options;
 using Microsoft.VisualBasic;
 using System.Reflection.Metadata;
 using VigilAgent.Api.Commons;
+using VigilAgent.Api.Helpers;
 using VigilAgent.Api.Models;
-using VigilAgent.Api.Services;
 
 namespace VigilAgent.Api.Data
 {

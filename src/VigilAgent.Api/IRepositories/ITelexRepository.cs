@@ -1,5 +1,5 @@
 ﻿using BloggerAgent.Domain.Commons;
-using VigilAgent.Api.Data;
+using VigilAgent.Api.Models;
 
 namespace VigilAgent.Api.IRepositories
 {

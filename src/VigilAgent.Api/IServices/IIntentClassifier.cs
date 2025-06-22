@@ -3,9 +3,8 @@ using VigilAgent.Api.Models;
 
 namespace VigilAgent.Api.IServices
 {
-    public interface IRequestProcessingService
+    public interface IIntentClassifier
     {
         Task<Request> ProcessUserInputAsync(TelemetryTask blogDto);
-        string GetBlogIntervalOption(TelemetryTask blogDto);
     }
 }

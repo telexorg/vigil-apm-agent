@@ -8,27 +8,21 @@ using VigilAgent.Apm.Telemetry;
 
 namespace VigilAgent.Api.Services
 {
-    public class TelemetryService
+    public class TelemetryHandler : ITelemetryHandler
     {
         public readonly static ConcurrentDictionary<string, ErrorDetail> Errors;
         public readonly static ConcurrentDictionary<string, Trace> Traces;
         public readonly static ConcurrentDictionary<string, Metric> Metrics;
 
-        static TelemetryService()
+        static TelemetryHandler()
         {
             Errors = new();
             Traces = new();
             Metrics = new();
         }
-    }
-
-
-    // ExplainErrorsHandler.cs
-    public class ExplainErrorsHandler : IAgentCommandHandler
-    {
-        public async Task<string> HandleAsync(string message)
+        public async Task<string> HandleErrorAsync(string message)
         {
-            var errors = TelemetryService.Errors.Values
+            var errors = TelemetryHandler.Errors.Values
                 .OrderByDescending(e => e.Timestamp)
                 .Take(5)
                 .Select(e =>
@@ -63,16 +57,10 @@ namespace VigilAgent.Api.Services
             var trimmed = string.Join("\n", stackTrace.Split('\n').Take(lines));
             return trimmed.Trim();
         }
-    }
 
-
-
-    // ShowLogsHandler.cs
-    public class ShowLogsHandler : IAgentCommandHandler
-    {
-        public Task<string> HandleAsync(string message)
+        public Task<string> HandleTraceAsync(string message)
         {
-            var logs = TelemetryService.Traces.Values
+            var logs = TelemetryHandler.Traces.Values
                 .OrderByDescending(t => t.Timestamp)
                 .Take(5)
                 .Select(t =>
@@ -88,14 +76,10 @@ namespace VigilAgent.Api.Services
 
             return Task.FromResult(response);
         }
-    }
 
-
-    public class ShowRuntimeMetrics : IAgentCommandHandler
-    {
-        public Task<string> HandleAsync(string message)
+        public Task<string> HandleMetricAsync(string message)
         {
-            var metrics = TelemetryService.Metrics.Values
+            var metrics = TelemetryHandler.Metrics.Values
                 .OrderByDescending(m => m.Timestamp)
                 .Take(5)
                 .Select(m =>
@@ -112,15 +96,11 @@ namespace VigilAgent.Api.Services
 
             return Task.FromResult(response);
         }
-    }
 
-    // RecommendFixHandler.cs
-    public class RecommendFixHandler : IAgentCommandHandler
-    {
         public Task<string> HandleAsync(string message)
         {
             // Dummy rule: recommend based on error volume
-            int errorCount = TelemetryService.Errors.Count;
+            int errorCount = TelemetryHandler.Errors.Count;
 
             string recommendation = errorCount > 5
                 ? "High error rate. Consider checking authentication or service availability."
@@ -129,7 +109,7 @@ namespace VigilAgent.Api.Services
             return Task.FromResult("🛠 Recommendation: " + recommendation);
         }
     }
-
+    
 }
 
 

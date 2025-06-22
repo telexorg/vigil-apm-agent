@@ -1,5 +1,6 @@
 using VigilAgent.Api.Commons;
 using VigilAgent.Api.Data;
+using VigilAgent.Api.Helpers;
 using VigilAgent.Api.IRepositories;
 using VigilAgent.Api.IServices;
 using VigilAgent.Api.Middleware;
@@ -22,12 +23,10 @@ builder.Services.AddScoped<TelexDbContext>();
 builder.Services.AddSingleton<KernelProvider>();
 
 builder.Services.AddHttpClient();
-builder.Services.AddScoped<IAgentCommandHandler, ShowLogsHandler>();
-builder.Services.AddScoped<IAgentCommandHandler, ShowRuntimeMetrics>();
-builder.Services.AddScoped<IAgentCommandHandler, ExplainErrorsHandler>();
+builder.Services.AddScoped<ITelemetryHandler, TelemetryHandler>();
 builder.Services.AddScoped<IVigilAgentService, VigilAgentService>();
 builder.Services.AddScoped<IAIService, AIService>();
-builder.Services.AddScoped<IRequestProcessingService, RequestProcessingService>();
+builder.Services.AddScoped<IIntentClassifier, IntentClassifier>();
 builder.Services.AddScoped(typeof(ITelexRepository<>), typeof(TelexRepository<>));
 builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
 
@@ -58,7 +57,7 @@ app.UseMiddleware<ExceptionHandler>();
 app.UseMiddleware<VigilMiddleware>();
 //app.UseMiddleware<ExceptionMiddleware>();
 
-app.UseMiddleware<RequestLoggingMiddleware>();
+app.UseMiddleware<RequestHandler>();
 
 //app.UseHttpsRedirection();
 

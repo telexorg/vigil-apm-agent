@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace VigilAgent.Api.Data
+namespace VigilAgent.Api.Models
 {
     public class Document<T>
     {

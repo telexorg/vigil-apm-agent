@@ -8,7 +8,7 @@ using VigilAgent.Api.Commons;
 
 namespace VigilAgent.Api.Services
 {
-    public class RequestProcessingService : IRequestProcessingService
+    public class IntentClassifier : IIntentClassifier
     {
         private static readonly HashSet<string> ErrorKeywords = new()
         { };
@@ -21,7 +21,7 @@ namespace VigilAgent.Api.Services
 
         private readonly ITelexRepository<Organization> _companyRepository;
 
-        public RequestProcessingService(ITelexRepository<Organization> companyRepository)
+        public IntentClassifier(ITelexRepository<Organization> companyRepository)
         {
             _companyRepository = companyRepository;
         }       
@@ -35,48 +35,27 @@ namespace VigilAgent.Api.Services
 
             var userInput = taskRequest.Message;
 
-            // Classify request (e.g., fetch blog, summarize, generate, etc.)
+            
             var classification = ClassifyRequest(userInput);
 
             var prompt = userInput;
-            var systemMessage = GenerateSystemMessage(classification, taskRequest.Settings);
+            var systemMessage = PromptBuilder.GenerateSystemMessage(classification, taskRequest.Settings);
 
-            // Generate appropriate prompt based on classification
+           
             if (classification == RequestType.ErrorRequst)
             {
-                prompt = GeneratePrompt(userInput, taskRequest.Settings, company.Data);
-            }
+                //prompt = GeneratePrompt(userInput, taskRequest.Settings, company.Data);
+            }           
            
-           
-            // Step 4: Return structured response
+            
             return new Request
             {
                 SystemMessage = systemMessage,
                 UserPrompt = prompt
             };
-        }
-               
+        }             
 
-        private string GeneratePrompt(string userPrompt, List<Setting> settings, Organization company)
-        {
-            
-
-            // Base prompt structure
-            string prompt = $"{userPrompt}.";    
-
-           
-
-            return prompt;
-        }
-
-        private string GenerateSystemMessage(RequestType requestType, List<Setting> settings)
-        {
-            string systemMessage = "Your name is Vigil. You are an APM agent who specializes in helping developers monitor there application providing insights for debugging and improving performance.";
-
-           
-
-            return systemMessage;
-        }
+       
 
         public static RequestType ClassifyRequest(string message)
         {
@@ -109,13 +88,6 @@ namespace VigilAgent.Api.Services
             return RequestType.Uncertain;
         }
 
-        public string GetBlogIntervalOption(TelemetryTask blogDto)
-        {
-            // Retrieve settings dynamically
-            string blogInterval = DataExtract.GetSettingValue(blogDto.Settings, "blog_generation_interval");
-
-            return blogInterval;
-        }
       
     }
 }

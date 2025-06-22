@@ -3,7 +3,7 @@ using System.Text;
 using System.Text.Json;
 using BloggerAgent.Domain.Commons;
 
-namespace VigilAgent.Api.Services
+namespace VigilAgent.Api.Helpers
 {
     public class HttpHelper
     {

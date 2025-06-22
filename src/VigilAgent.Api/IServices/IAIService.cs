@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VigilAgent.Api.Helpers;
+using VigilAgent.Api.Commons;
 
 namespace VigilAgent.Api.IServices
 {

@@ -1,5 +1,6 @@
 ﻿using VigilAgent.Api.Data;
 using VigilAgent.Api.IRepositories;
+using VigilAgent.Api.Models;
 
 namespace VigilAgent.Api.Repositories
 {

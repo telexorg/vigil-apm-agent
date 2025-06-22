@@ -12,11 +12,11 @@ namespace VigilAgent.Api.Controllers
     [ApiController]
     public class TelexController : ControllerBase
     {
-        private readonly IAgentCommandHandler _commandHandler;
+        private readonly ITelemetryHandler _commandHandler;
         private ILogger<TelexController> _logger;
         private readonly IVigilAgentService _agent;
 
-        public TelexController(IAgentCommandHandler blogService, ILogger<TelexController> logger, IVigilAgentService agent)
+        public TelexController(ITelemetryHandler blogService, ILogger<TelexController> logger, IVigilAgentService agent)
         {
             _commandHandler = blogService;
             _logger = logger;

@@ -3,7 +3,7 @@
     public class ApiKeyMiddleware
     {
         private readonly RequestDelegate _next;
-        private const string HeaderName = "X-API-Key";
+        private const string HeaderName = "X-AGENT-API-Key";
         private const string ValidApiKey = ""; // Store securely
 
         public ApiKeyMiddleware(RequestDelegate next)

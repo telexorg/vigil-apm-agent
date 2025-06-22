@@ -1,4 +1,7 @@
-﻿namespace VigilAgent.Api.Helpers
+﻿using VigilAgent.Api.Commons;
+using VigilAgent.Api.Enums;
+
+namespace VigilAgent.Api.Helpers
 {
     public static class PromptBuilder
     {
@@ -33,6 +36,14 @@
                 Use the summary to answer helpfully and clearly. Suggest next steps if needed. Speak like an intelligent, reassuring assistant—not a log file.
                 """;
 
+        }
+
+        public static string GenerateSystemMessage(RequestType requestType, List<Setting> settings)
+        {
+            string systemMessage = "Your name is Vigil. You are an APM agent who specializes in helping developers monitor there application providing insights for debugging and improving performance.";
+
+
+            return systemMessage;
         }
 
         public static string BuildCustomPrompt(string userMessage, string context, string tone = "professional")
