@@ -92,7 +92,7 @@ namespace VigilAgent.Apm.Middleware
                 var duration = stopwatch.ElapsedMilliseconds;
                 var evt = new TelemetryEvent()
                 {
-                    TraceId = traceId,
+                    Id = traceId,
                     Method = method,
                     Path = path,
                     StatusCode = statusCode,

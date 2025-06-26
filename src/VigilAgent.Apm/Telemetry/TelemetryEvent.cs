@@ -8,7 +8,7 @@ namespace VigilAgent.Apm.Telemetry
 {
     public class TelemetryEvent
     {
-        public string  TraceId { get; set; }
+        public string  Id { get; set; }
         public string Type { get; set; } = "trace";
         public string Path { get; set; }
         public string  Method { get; set; }

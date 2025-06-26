@@ -12,6 +12,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.SemanticKernel" Version="1.57.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
+    <PackageReference Include="MongoDB.Bson" Version="3.4.0" />
+    <PackageReference Include="MongoDB.Driver" Version="3.4.0" />
     <PackageReference Include="SemanticKernelPooling" Version="1.5.2" />
     <PackageReference Include="SemanticKernelPooling.Connectors.Google" Version="1.5.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />

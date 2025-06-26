@@ -8,5 +8,7 @@ namespace VigilAgent.Api.IRepositories
     {
         Task<Document<Message>> GetConversationsByUserAsync(string userId);
         Task<List<TelexChatMessage>> GetMessagesAsync(string contextId);
+
+        Task<bool> AddMessageAsync(string message, TelemetryTask task, string role);
     }
 }

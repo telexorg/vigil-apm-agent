@@ -9,7 +9,7 @@ namespace VigilAgent.Apm.Telemetry
     public class ErrorDetail
     {
         public string TraceId { get; set; }             // Link to the trace
-        public string ErrorId { get; set; } = Guid.NewGuid().ToString(); // Unique ID for the error
+        public string Id { get; set; } = Guid.NewGuid().ToString(); // Unique ID for the error
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
         public string Type { get; set; } = "error";
         public string ExceptionType { get; set; }

@@ -41,12 +41,7 @@ namespace VigilAgent.Api.Helpers
 
             return new Organization
             {
-                Name = companyName,
-                Industry = industry,
-                Tone = tone,
-                Overview = companyOverview,
-                Website = companyWebsite,
-                TargetAudience = targetAudience
+               
             };
 
         }
@@ -96,10 +91,10 @@ namespace VigilAgent.Api.Helpers
                 ContextId = message.ContextId,
                 TaskId = message.TaskId,
                 MessageId = message.MessageId,
-                //OrganizationId = request.Params.Metadata != null &&
-                //                 request.Params.Metadata.TryGetValue("org_id", out var org)
-                //                 ? org?.ToString()
-                //                 : null,
+                OrgId = request.Params.Metadata != null &&
+                 request.Params.Metadata.TryGetValue("org_id", out var org)
+                 ? org?.ToString()
+                 : null,
                 Settings = request.Params.Metadata != null &&
                            request.Params.Metadata.TryGetValue("settings", out var settingsObj)
                            ? JsonSerializer.Deserialize<List<Setting>>(settingsObj.ToString())

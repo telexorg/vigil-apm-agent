@@ -5,32 +5,36 @@ namespace VigilAgent.Api.Helpers;
 
 public class RequestRouter
 {
-    private readonly Dictionary<string, ITelemetryHandler> _handlers;
 
-    public RequestRouter(Dictionary<string, ITelemetryHandler> handlers)
+    private readonly ITelemetryService _telemetryHandler;
+    private readonly Dictionary<string, Func<string, Task<string>>> _handlers;
+    public RequestRouter(ITelemetryService telemetryHandler)
     {
-        _handlers = handlers;
+        _telemetryHandler = telemetryHandler;
+
+        _handlers = new Dictionary<string, Func<string, Task<string>>>
+            {
+                { "show-logs", param => _telemetryHandler.GetLogs(param) },
+                { "explain-errors", param => _telemetryHandler.GetErrors(param) },
+                { "show-metrics", param => _telemetryHandler.GetMetrics(param)},
+            };
     }
 
     public async Task<string> RouteAsync(string message)
-    {
-        var messageIntent = 
+    {       
 
         message = message.ToLowerInvariant();
 
         if (Regex.IsMatch(message, @"logs|requests|traces"))
-            return await _handlers["show-logs"].HandleAsync(message);
+            return await _handlers["show-logs"](message);
 
         if (Regex.IsMatch(message, @"error|errors|exception|fail"))
-            return await _handlers["explain-errors"].HandleAsync(message);
+            return await _handlers["explain-errors"](message);
         
         if (Regex.IsMatch(message, @"metrics|proccesses|runtime|fail"))
-            return await _handlers["show-metrics"].HandleAsync(message);
+            return await _handlers["show-metrics"](message);
 
-        if (Regex.IsMatch(message, @"recommend|fix|what should we do"))
-            return await _handlers["recommend-fix"].HandleAsync(message);
-
-        return "🤖 I didn't understand that yet. Try asking about logs, errors, or recommendations.";
+        return "NO_MATCH";
     }
 }
 

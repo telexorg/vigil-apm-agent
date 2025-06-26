@@ -1,6 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Text;
 using System.Text.Json;
+using VigilAgent.Api.Commons;
+using VigilAgent.Api.Dtos;
+using VigilAgent.Api.Helpers;
 
 namespace VigilAgent.Api.Middleware
 {
@@ -39,8 +42,38 @@ namespace VigilAgent.Api.Middleware
                 {
                     if (!string.IsNullOrWhiteSpace(body))
                     {
+
+
                         using var jsonDoc = JsonDocument.Parse(body);
                         formattedBody = JsonSerializer.Serialize(jsonDoc, new JsonSerializerOptions { WriteIndented = true });
+
+                             _logger.LogInformation($"======================================================================================" +
+                           $"\n🔍 Incoming Request: {request.Method} {request.Path}\n" +
+                           $"📌 Headers: {headers}\n" +
+                           $"📌 Query Parameters: {queryParams}\n" +
+                           $"📌 Body: {formattedBody}\n" +
+                           $"=======================================================================================");
+
+                        if (context.Request.Path == "/api/v1" && context.Request.Method == "POST")
+                        {
+                            var requestBody = JsonSerializer.Deserialize<TaskRequest>(body, new JsonSerializerOptions
+                            {
+                                PropertyNameCaseInsensitive = true
+                            });
+                            var telemetryTask = DataExtract.ExtractTaskData(requestBody); // your helper method
+                            var taskContext = new TaskContext
+                            {
+                                OrgId = telemetryTask.OrgId,
+                                Message = telemetryTask.Message,
+                                TaskId = telemetryTask.TaskId,
+                                ContextId = telemetryTask.ContextId,
+                                MessageId = telemetryTask.MessageId,
+                                Settings = telemetryTask.Settings
+                            };
+
+                            context.Items["TaskContext"] = taskContext;
+
+                        }
                     }
                 }
                 catch (JsonException ex)
@@ -48,12 +81,7 @@ namespace VigilAgent.Api.Middleware
                     _logger.LogError(ex, "❌ JSON Parsing Error - Malformed request body. Logging raw body.");
                 }
 
-                _logger.LogInformation($"======================================================================================" +
-                    $"\n🔍 Incoming Request: {request.Method} {request.Path}\n" +
-                    $"📌 Headers: {headers}\n" +
-                    $"📌 Query Parameters: {queryParams}\n" +
-                    $"📌 Body: {formattedBody}\n" +
-                    $"=======================================================================================");
+               
 
                 await _next(context);
             }

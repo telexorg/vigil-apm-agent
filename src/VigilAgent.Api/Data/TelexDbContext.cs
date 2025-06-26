@@ -30,6 +30,7 @@ namespace VigilAgent.Api.Data
 
         }
 
+
         public async Task<TelexApiResponse<T>> CreateCollection<T>()
         {
             var apiRequest = new ApiRequest()
@@ -121,8 +122,7 @@ namespace VigilAgent.Api.Data
         {
             string tagName = nameof(T);
             if (typeof(T) == typeof(Error)) tagName = nameof(T);
-            else if (typeof(T) == typeof(Error)) tagName = CollectionType.Convesation;
-            else if (typeof(T) == typeof(Trace)) tagName = CollectionType.Blog;
+            else if (typeof(T) == typeof(Organization)) tagName = CollectionType.Organization;
             else if (typeof(T) == typeof(Message)) tagName = CollectionType.Message;
 
             var apiRequest = new ApiRequest()
@@ -154,6 +154,7 @@ namespace VigilAgent.Api.Data
 
             return TelexApiResponse<Document<T>>.ExtractResponse(responseContent);
         }
+
 
         public async Task<TelexApiResponse<Document<T>>> UpdateAsync<T>(string id, object document)
         {

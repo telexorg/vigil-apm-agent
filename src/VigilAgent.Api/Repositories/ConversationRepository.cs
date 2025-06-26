@@ -1,4 +1,5 @@
 ﻿using BloggerAgent.Domain.Commons;
+using System.Linq.Expressions;
 using VigilAgent.Api.Commons;
 using VigilAgent.Api.Data;
 using VigilAgent.Api.IRepositories;
@@ -17,10 +18,12 @@ namespace VigilAgent.Api.Repositories
             _repository = repository;
         }
 
+
         public async Task<Document<Message>> GetConversationsByUserAsync(string userId)
         {
             return await _repository.GetByIdAsync(userId);
         }
+
 
         public async Task<List<TelexChatMessage>> GetMessagesAsync(string contextId)
         {
@@ -38,86 +41,23 @@ namespace VigilAgent.Api.Repositories
                     Content =  c.Data.Content 
                 }).ToList();
         }
-             
-
-        //public async Task<Company> AddCompanyAsync(Company company)
-        //{
-        //    if (company.Id == null)
-        //        throw new ArgumentNullException();
-
-        //    var existingCompany = await _companyRepository.GetByIdAsync(company.Id);
-
-        //    if (existingCompany != null)
-        //    {
-        //        throw new Exception("Company already exists");
-        //    }
-
-        //    var newCompany = new Company
-        //    {
-        //        Id = company.Id,
-        //        Name = company.Name,
-        //        Tone = company.Tone,
-        //        TargetAudience = company.TargetAudience,
-        //        Overview = company.Overview,
-        //        Industry = company.Industry,
-        //    };
-
-        //    /*var channelId = company.Users.FirstOrDefault().Id;
-
-        //    var user = await _userService.GetUserAsync(channelId);
-
-        //    if (user != null)
-        //    {
-        //        throw new DuplicateNameException();
-        //    }
-        //    var newUser = new User { Id = channelId };
-
-        //    newCompany.Users.Add(newUser);
-
-        //    try
-        //    {
-        //    }
-        //    catch (Exception)
-        //    {
-        //        // Rollback: Delete the company if user creation fails
-        //        await _userRepository.DeleteAsync(newUser.Id);
-        //        throw;
-        //    }*/
-
-        //    // Register the company’s communication channel as a user
-        //    await _companyRepository.CreateAsync(newCompany);
-
-        //    return newCompany;
-        //}
-
-        //public async Task<Company> UpdateCompanyAsync(Company company)
-        //{
-        //    if (company.Id == null)
-        //        throw new ArgumentNullException();
-
-        //    var companyDoc = await _companyRepository.GetByIdAsync(company.Id);
-
-        //    if (companyDoc == null)
-        //    {
-        //        throw new Exception("Company not found exists");
-        //    }
-
-        //    var existingCompany = companyDoc.Data;
-
-        //    existingCompany.Id = company.Id ?? existingCompany.Id;
-        //    existingCompany.Name = company.Name ?? existingCompany.Name;
-        //    existingCompany.Tone = company.Tone ?? existingCompany.Tone;
-        //    existingCompany.TargetAudience = company.TargetAudience ?? existingCompany.TargetAudience;
-        //    existingCompany.Overview = company.Overview ?? existingCompany.Overview;
-        //    existingCompany.Industry = company.Industry ?? existingCompany.Industry;
 
 
+        public async Task<bool> AddMessageAsync(string message, TelemetryTask task, string role)
+        {
+            var newMessage = new Message
+            {
+                Id = Guid.NewGuid().ToString(),
+                Content = message,
+                TaskId = task.TaskId,
+                ContextId = task.ContextId,
+                Role = role
+            };
 
-        //    // Register the company’s communication channel as a user
-        //    await _companyRepository.UpdateAsync("", existingCompany);
+            return await _repository.CreateAsync(newMessage);             
 
-        //    return existingCompany;
-        //}
+        }
+
     }
 }
 

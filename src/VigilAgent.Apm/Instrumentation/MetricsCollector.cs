@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using VigilAgent.Apm.Telemetry;
 using Timer = System.Timers.Timer;
 
 namespace VigilAgent.Apm.Instrumentation
@@ -60,19 +61,9 @@ namespace VigilAgent.Apm.Instrumentation
                 AvailableIOThreads = ioThreads,
             };
 
-            Telemetry.TelemetryBuffer.Add(metrics);
+            TelemetryBuffer.Add(metrics);
 
-            Console.WriteLine($"""
-
-            [Metrics]
-              🕒 Timestamp     : {DateTime.Now}
-              🔁 CPU Usage     : {metrics.CpuUsagePercent}%
-              💾 Memory Usage  : {metrics.MemoryUsageBytes / 1024 / 1024}MB
-              ♻️ GC Total      : Gen0={metrics.Gen0Collections}, Gen1={metrics.Gen1Collections}, Gen2={metrics.Gen2Collections}
-              🧮 GC Deltas     : ΔGen0={metrics.DeltaGen0}, ΔGen1={metrics.DeltaGen1}, ΔGen2={metrics.DeltaGen2}
-              🧵 Threads       : Worker={metrics.AvailableWorkerThreads}, IO={metrics.AvailableIOThreads}
-
-            """);
+            Console.WriteLine($"[Metrics] 🕒 Timestamp : {DateTime.Now} 🔁 CPU Usage : {metrics.CpuUsagePercent}% 💾 Memory Usage  : {metrics.MemoryUsageBytes / 1024 / 1024}MB ♻️ GC Total : Gen0={metrics.Gen0Collections}, Gen1={metrics.Gen1Collections}, Gen2={metrics.Gen2Collections}🧮 GC Deltas : ΔGen0={metrics.DeltaGen0}, ΔGen1={metrics.DeltaGen1}, ΔGen2={metrics.DeltaGen2} 🧵 Threads : Worker={metrics.AvailableWorkerThreads}, IO={metrics.AvailableIOThreads}");
         }
 
         // Approximate CPU usage (per interval, could be improved)

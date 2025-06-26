@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using VigilAgent.Api.IServices;
 using VigilAgent.Api.Models;
 using VigilAgent.Api.Services;
 using VigilAgent.Apm.Instrumentation;
@@ -13,6 +15,12 @@ namespace VigilAgent.Api.Controllers
     public class TelemetryController : ControllerBase
     {
         private static int n = 1;
+        private readonly ITelemetryHandler _telemetryHandler;
+
+        public TelemetryController(ITelemetryHandler telemetryHandler)
+        {
+            _telemetryHandler = telemetryHandler;
+        }
 
         [HttpGet]
         public async Task<IActionResult> Get()
@@ -32,66 +40,27 @@ namespace VigilAgent.Api.Controllers
             return Ok("Controller is working");
         }
 
-        [HttpPost]
+       [HttpPost]
         public async Task<IActionResult> Batch([FromBody] JsonElement batch)
         {
-            if (batch.ValueKind != JsonValueKind.Array || batch.GetArrayLength() == 0)
-                return BadRequest("Invalid or empty batch");
-
-            var options = new JsonSerializerOptions()
+            try
             {
-                PropertyNameCaseInsensitive = true,
-            };
+                if (batch.ValueKind != JsonValueKind.Array || batch.GetArrayLength() == 0)
+                    return BadRequest("Invalid or empty batch");
 
-            foreach (var item in batch.EnumerateArray())
-            {
-                if (!item.TryGetProperty("type", out var typeProperty))
-                {
-                    Console.WriteLine("[Batch] Skipping item with no type");
-                    continue;
-                }
+                if (!HttpContext.Items.TryGetValue("Project", out var projectObj) || projectObj is not Project project)
+                    return Unauthorized("Project context missing or invalid");
 
-                var type = typeProperty.GetString();
+                await _telemetryHandler.HandleBatchItemsAsync(batch, project);
 
-                switch (type)
-                {
-                    case "trace":
-                        var trace = item.Deserialize<Trace>(options);
-                        if (trace != null)
-                        {
-                            TelemetryHandler.Traces[trace.TraceId] = trace;
-                            Console.WriteLine($"[Batch] {trace.TraceId} trace - {trace.Path} = {trace.StatusCode} in {trace.DurationMs}ms");
-                        }
-                        break;
-
-                    case "error":
-                        var error = item.Deserialize<ErrorDetail>(options);
-                        if (error != null)
-                        {
-                            TelemetryHandler.Errors[error.TraceId] = error;
-                            Console.WriteLine($"[Batch] {error.TraceId} exception - {error.Url} = {error.StatusCode} at {error.Timestamp}");
-                            Console.WriteLine($"        ✖ {error.ExceptionType}: {error.Message}");
-                        }
-                        break;
-
-                    case "metrics":
-                        var metrics = item.Deserialize<Metric>(options);
-                        if (metrics != null)
-                        {
-                            var id = Guid.NewGuid().ToString();
-                            TelemetryHandler.Metrics[id] = metrics;
-                            Console.WriteLine($"[Batch] metrics - CPU: {metrics.CpuUsagePercent}%, Mem: {metrics.MemoryUsageBytes / 1024 / 1024}MB, GC0: {metrics.Gen0Collections}");
-                        }
-                        break;
-
-                    default:
-                        Console.WriteLine($"[Batch] Unknown type: {type}");
-                        break;
-                }
+                return Ok();
             }
-
-            return Ok();
+            catch (Exception ex)
+            {
+                throw new Exception($"Error processing batch: {ex.Message}", ex);
+            }
         }
 
+       
     }
 }

@@ -24,7 +24,7 @@ namespace VigilAgent.Apm.Telemetry
             var batch = TelemetryBuffer.DrainBatch();
             if (batch.Count == 0) return;
 
-            await TelemetrySender.ExportAsync(batch);
+            await TelemetryClient.SendBatchAsync(batch);
 
             /*//foreach (var item in batch)
             //{

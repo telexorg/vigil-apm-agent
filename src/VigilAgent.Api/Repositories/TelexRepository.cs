@@ -30,13 +30,13 @@ namespace VigilAgent.Api.Repositories
         {
             var result = await _context.GetAll<T>(filter);
 
-            return result.Status == "success" ? result.Data : null;
+            return result.Status == "success" ? result.Data : new List<Document<T>>();
         }
 
         public async Task<List<Document<T?>>> FilterAsync(object filter)
         {
             var result = await _context.GetAll<T>(filter);
-            return result.Status == "success" ? result.Data : null;
+            return result.Status == "success" ? result.Data : new List<Document<T>>();
         }
 
         public async Task<bool> UpdateAsync(string id, T document)
@@ -44,8 +44,7 @@ namespace VigilAgent.Api.Repositories
             var response = await _context.UpdateAsync<T>(id, document);
             return response.Status == "success";
         }
-
-        // Update a new document
+                
         public async Task<bool> DeleteAsync(string id)
         {
             var response = await _context.DeleteAsync<T>(id);
