@@ -8,14 +8,10 @@ namespace VigilAgent.Apm.Telemetry
 {
     public class TelemetryEvent
     {
-        public string  Id { get; set; }
-        public string Type { get; set; } = "trace";
-        public string Path { get; set; }
-        public string  Method { get; set; }
-        public int StatusCode { get; set; }
-        public long DurationMs { get; set; }
-        public bool isError { get; set; } = false;
-
+        public string Id { get; set; }
+        public string Type { get; set; }
+        public int RetryCount { get; set; } = 0;
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
     }
 }
+

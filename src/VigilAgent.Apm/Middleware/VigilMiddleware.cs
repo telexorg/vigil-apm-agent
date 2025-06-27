@@ -1,16 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Net;
 using System.Security.Authentication;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
 using VigilAgent.Apm.Context;
 using VigilAgent.Apm.Instrumentation;
+using VigilAgent.Apm.Processing;
 using VigilAgent.Apm.Telemetry;
 
 namespace VigilAgent.Apm.Middleware
@@ -18,111 +13,107 @@ namespace VigilAgent.Apm.Middleware
     public class VigilMiddleware
     {
         private readonly RequestDelegate _next;
+        private readonly ILogger<VigilMiddleware> _logger;
+        private readonly TelemetryBuffer _telemetryBuffer;
+        private readonly MetricsCollector _metricsCollector;
 
-        public VigilMiddleware(RequestDelegate next)
+        public VigilMiddleware(RequestDelegate next, ILogger<VigilMiddleware> logger, TelemetryBuffer telemetryBuffer, MetricsCollector metricsCollector)
         {
             _next = next;
+            _logger = logger;
+            _telemetryBuffer = telemetryBuffer;
+            _metricsCollector = metricsCollector;
         }
 
         public async Task InvokeAsync(HttpContext context)
         {
-            if (context.Request.Path.StartsWithSegments("/api/v1/Telemetry") && context.Request.Method.Equals("POST", StringComparison.OrdinalIgnoreCase))
+            if (context.Request.Path.StartsWithSegments("/api/v1/Telemetry") &&
+                context.Request.Method.Equals("POST", StringComparison.OrdinalIgnoreCase))
             {
-                await _next(context); // Don't trace export calls
+                await _next(context); // Avoid recursive telemetry tracking
                 return;
             }
 
             var traceId = Guid.NewGuid().ToString();
             TraceContext.TraceId = traceId;
-            Console.WriteLine($"[Vigil] [{traceId}] trace {context.Request.Method} {context.Request.Path} -> in progress...");
+
+            var method = context.Request.Method;
+            var path = context.Request.Path;
+            _logger.LogDebug("[Vigil] [{TraceId}] {Method} {Path} -> started", traceId, method, path);
 
             var stopwatch = Stopwatch.StartNew();
-            MetricsCollector.Start();
-            TelemetryFlusher.Start();
+
+            context.Response.OnStarting(() =>
+            {
+                context.Response.Headers["X-Trace-ID"] = traceId;
+                return Task.CompletedTask;
+            });
 
             try
             {
-                context.Response.OnStarting(() =>
-                {
-                    context.Response.Headers["X-Trace-ID"] = traceId;
-                    return Task.CompletedTask;
-                });
-
                 await _next(context);
             }
             catch (Exception ex)
             {
+                var status = DetermineStatusCode(ex);
+                context.Response.StatusCode = status;
+                context.Response.ContentType = "application/json";
 
-                int status = DetermineStatusCode(ex);
-
-                var duration = stopwatch.ElapsedMilliseconds;
-
-                var error = new ErrorDetail
+                var error = new ErrorEvent
                 {
+                    Id = Guid.NewGuid().ToString(),
+                    Type = "error",
                     TraceId = traceId,
                     ExceptionType = ex.GetType().Name,
                     Message = ex.Message,
                     StackTrace = ex.StackTrace,
                     InnerExceptionMessage = ex.InnerException?.Message,
-                    HttpMethod = context.Request.Method,
-                    Url = context.Request.Path.ToString(),
-                    OccurredAt = duration,
-                    StatusCode = StatusCodes.Status500InternalServerError,
-                    //Source = context.Request.
+                    HttpMethod = method,
+                    Url = path.ToString(),
+                    StatusCode = status
                 };
 
-                TelemetryBuffer.Add(error);
+                await _telemetryBuffer.AddAsync(error);
+                _logger.LogWarning(ex, "[Vigil] [{TraceId}] error {Method} {Path} -> {StatusCode}", traceId, method, path, status);
 
-                context.Response.StatusCode = status;
-                context.Response.ContentType = "application/json";
-
-                Console.WriteLine($"[Vigil EX] [{error.TraceId}] error {context.Request.Method} {context.Request.Path} -> {status} in {error.OccurredAt}ms");
-
-
-                // Re-throw so ASP.NET shows correct error
-                throw;
+                throw; // Let ASP.NET handle the actual error rendering
             }
             finally
             {
                 stopwatch.Stop();
-                
-                var method = context.Request.Method;
-                var path = context.Request.Path;
-                var statusCode = context.Response.StatusCode;
+
                 var duration = stopwatch.ElapsedMilliseconds;
-                var evt = new TelemetryEvent()
+                var statusCode = context.Response.StatusCode;
+
+                var traceEvent = new TraceEvent
                 {
                     Id = traceId,
+                    Type = "trace",
                     Method = method,
                     Path = path,
                     StatusCode = statusCode,
                     DurationMs = duration,
-                    isError = statusCode != StatusCodes.Status200OK
+                    isError = statusCode >= 400
                 };
-                TelemetryBuffer.Add(evt);
 
-                Console.WriteLine($"[Vigil] [{traceId}] {evt.Type} {method} {path} -> {statusCode} in {duration}ms");
+                await _telemetryBuffer.AddAsync(traceEvent);
+
+                _logger.LogInformation("[Vigil] [{TraceId}] {Method} {Path} -> {StatusCode} in {Duration}ms",
+                    traceId, method, path, statusCode, duration);
 
                 TraceContext.Clear();
-                MetricsCollector.Collect();
-
+                _metricsCollector.Collect();
             }
         }
 
-        private int DetermineStatusCode(Exception exception)
+        private static int DetermineStatusCode(Exception exception) => exception switch
         {
-            // Map certain exception types to specifc status codes
-            return exception switch
-            {
-                ArgumentException or ArgumentNullException _ => (int)HttpStatusCode.BadRequest,
-                UnauthorizedAccessException _ => (int)HttpStatusCode.Unauthorized,
-                NotImplementedException _ => (int)HttpStatusCode.NotImplemented,
-                AuthenticationException _ => (int)HttpStatusCode.Forbidden,
-                FileNotFoundException _ => (int)HttpStatusCode.NotFound,
-
-                _ => (int)HttpStatusCode.InternalServerError,
-
-            };
-        }
+            ArgumentException or ArgumentNullException => (int)HttpStatusCode.BadRequest,
+            UnauthorizedAccessException => (int)HttpStatusCode.Unauthorized,
+            NotImplementedException => (int)HttpStatusCode.NotImplemented,
+            AuthenticationException => (int)HttpStatusCode.Forbidden,
+            FileNotFoundException => (int)HttpStatusCode.NotFound,
+            _ => (int)HttpStatusCode.InternalServerError
+        };
     }
 }

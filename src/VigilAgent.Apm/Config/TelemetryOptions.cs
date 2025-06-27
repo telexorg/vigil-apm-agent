@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 namespace VigilAgent.Apm.Config
 {
    
-        public class AgentConfig
+        public class TelemetryOptions
         {
+            public const string TelemetryEndpoint  = "https://vigil-apm-agent.onrender.com/api/v1/Telemetry";
             public int FlushIntervalMs { get; set; } = 5000;
             public int MaxBatchSize { get; set; } = 10;
-            public string TelemetryEndpoint { get; set; } = "https://telex.io/api/telemetry";
             public string ApiKey { get; set; }
-            public string ServiceName { get; set; } = "default-service";
+            public string ServiceName { get; set; } = "backend-service";
             public string Environment { get; set; } = "development";
             public bool EnableRuntimeMetrics { get; set; } = true;
             public bool EnableExceptionLogging { get; set; } = true;

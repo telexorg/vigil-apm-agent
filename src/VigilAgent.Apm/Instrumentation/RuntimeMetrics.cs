@@ -3,14 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VigilAgent.Apm.Telemetry;
 
 namespace VigilAgent.Apm.Instrumentation
 {
-    public class RuntimeMetrics
+    public class RuntimeMetrics : TelemetryEvent
     {
-        public string Id { get; set; } = Guid.NewGuid().ToString();
-        public string Type { get; set; } = "metrics";
-        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
         public double CpuUsagePercent { get; set; }
         public long MemoryUsageBytes { get; set; }
         public int Gen0Collections { get; set; }

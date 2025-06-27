@@ -4,13 +4,12 @@ namespace VigilAgent.Apm.Config
 {
     public static class AgentConfigLoader
     {
-        public static AgentConfig Load()
+        public static TelemetryOptions Load()
         {
-            return new AgentConfig
+            return new TelemetryOptions
             {
                 FlushIntervalMs = GetInt("VIGIL_FLUSH_INTERVAL_MS", 5000),
                 MaxBatchSize = GetInt("VIGIL_MAX_BATCH_SIZE", 10),
-                TelemetryEndpoint = GetEnv("VIGIL_ENDPOINT", "https://telex.io/api/telemetry"),
                 ApiKey = GetEnv("VIGIL_API_KEY", null),
                 ServiceName = GetEnv("VIGIL_SERVICE_NAME", "default-service"),
                 Environment = GetEnv("VIGIL_ENVIRONMENT", "development"),

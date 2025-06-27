@@ -1,88 +1,122 @@
 ﻿using System.Diagnostics;
-using VigilAgent.Apm.Telemetry;
 using Timer = System.Timers.Timer;
+using Microsoft.Extensions.Logging;
+using VigilAgent.Apm.Processing;
 
 namespace VigilAgent.Apm.Instrumentation
 {
     public class MetricsCollector
     {
-        public static readonly Timer _metricsTimer;
-        private static readonly Process _currentProcess = Process.GetCurrentProcess();
-        private static DateTime _lastCheckTime = DateTime.UtcNow;
-        private static TimeSpan _lastCpuTime = _currentProcess.TotalProcessorTime;
+        private readonly ILogger<MetricsCollector> _logger;
+        private readonly TelemetryBuffer _telemetryBuffer;
+        private readonly Timer _metricsTimer;
+        private readonly Process _process = Process.GetCurrentProcess();
 
-        // Previous GC counts
-        private static int _lastGen0 = GC.CollectionCount(0);
-        private static int _lastGen1 = GC.CollectionCount(1);
-        private static int _lastGen2 = GC.CollectionCount(2);
+        private DateTimeOffset _lastCheck = DateTimeOffset.UtcNow;
+        private TimeSpan _lastCpu = Process.GetCurrentProcess().TotalProcessorTime;
 
-        static MetricsCollector()
+        private int _lastGen0 = GC.CollectionCount(0);
+        private int _lastGen1 = GC.CollectionCount(1);
+        private int _lastGen2 = GC.CollectionCount(2);
+
+        public MetricsCollector(ILogger<MetricsCollector> logger, TelemetryBuffer telemetryBuffer)
         {
-            _metricsTimer = new Timer(600000);
-            _metricsTimer.Elapsed += (_, _) => Collect();
+            _logger = logger;
+            _metricsTimer = new Timer(600_000); // every 10 min
+            _metricsTimer.Elapsed += (_, _) => SafeCollect();
             _metricsTimer.AutoReset = true;
+            _telemetryBuffer = telemetryBuffer;
         }
 
-        public static void Start() => _metricsTimer.Start();
-
-        public static void Collect()
+        public void Start()
         {
-            _currentProcess.Refresh();
+            _logger.LogInformation("[Vigil.Metrics] Collector started");
+            _metricsTimer.Start();
+        }
 
-            // Thread pool info
-            ThreadPool.GetAvailableThreads(out int workerThreads, out int ioThreads);
+        public void Stop()
+        {
+            _metricsTimer.Stop();
+            _logger.LogInformation("[Vigil.Metrics] Collector stopped");
+        }
 
-            // Current GC counts
-            int currentGen0 = GC.CollectionCount(0);
-            int currentGen1 = GC.CollectionCount(1);
-            int currentGen2 = GC.CollectionCount(2);
+        public async void Collect()
+        {
+            _process.Refresh();
+            ThreadPool.GetAvailableThreads(out int worker, out int io);
 
-            // Delta since last check
-            int deltaGen0 = currentGen0 - _lastGen0;
-            int deltaGen1 = currentGen1 - _lastGen1;
-            int deltaGen2 = currentGen2 - _lastGen2;
+            var currentGen0 = GC.CollectionCount(0);
+            var currentGen1 = GC.CollectionCount(1);
+            var currentGen2 = GC.CollectionCount(2);
 
-            // Update previous counts
+            var deltaGen0 = currentGen0 - _lastGen0;
+            var deltaGen1 = currentGen1 - _lastGen1;
+            var deltaGen2 = currentGen2 - _lastGen2;
+
             _lastGen0 = currentGen0;
             _lastGen1 = currentGen1;
             _lastGen2 = currentGen2;
 
+            var cpu = GetCpuUsage();
+            var mem = _process.WorkingSet64;
+
             var metrics = new RuntimeMetrics
             {
-                CpuUsagePercent = GetCpuUsage(),
-                MemoryUsageBytes = _currentProcess.WorkingSet64,
+                Id = Guid.NewGuid().ToString(),
+                Type = "metrics",
+                CpuUsagePercent = cpu,
+                MemoryUsageBytes = mem,
                 Gen0Collections = currentGen0,
                 Gen1Collections = currentGen1,
                 Gen2Collections = currentGen2,
                 DeltaGen0 = deltaGen0,
                 DeltaGen1 = deltaGen1,
                 DeltaGen2 = deltaGen2,
-                AvailableWorkerThreads = workerThreads,
-                AvailableIOThreads = ioThreads,
+                AvailableWorkerThreads = worker,
+                AvailableIOThreads = io,
             };
 
-            TelemetryBuffer.Add(metrics);
+            await _telemetryBuffer.AddAsync(metrics);
 
-            Console.WriteLine($"[Metrics] 🕒 Timestamp : {DateTime.Now} 🔁 CPU Usage : {metrics.CpuUsagePercent}% 💾 Memory Usage  : {metrics.MemoryUsageBytes / 1024 / 1024}MB ♻️ GC Total : Gen0={metrics.Gen0Collections}, Gen1={metrics.Gen1Collections}, Gen2={metrics.Gen2Collections}🧮 GC Deltas : ΔGen0={metrics.DeltaGen0}, ΔGen1={metrics.DeltaGen1}, ΔGen2={metrics.DeltaGen2} 🧵 Threads : Worker={metrics.AvailableWorkerThreads}, IO={metrics.AvailableIOThreads}");
+            _logger.LogInformation(
+                "[Metrics] {Timestamp} | CPU: {CPU}% | Mem: {Mem}MB | GC Δ: Gen0={Gen0}, Gen1={Gen1}, Gen2={Gen2} | Threads: Worker={Worker}, IO={IO}",
+                metrics.Timestamp.TimeOfDay,
+                cpu,
+                mem / 1024 / 1024,
+                deltaGen0,
+                deltaGen1,
+                deltaGen2,
+                worker,
+                io
+            );
         }
 
-        // Approximate CPU usage (per interval, could be improved)
-        private static double GetCpuUsage()
+        private double GetCpuUsage()
         {
-            _currentProcess.Refresh();
+            _process.Refresh();
 
-            var currentCpuTime = _currentProcess.TotalProcessorTime;
-            var currentTime = DateTime.UtcNow;
+            var now = DateTimeOffset.UtcNow;
+            var cpuNow = _process.TotalProcessorTime;
 
-            var cpuUsedMs = (currentCpuTime - _lastCpuTime).TotalMilliseconds;
-            var elapsedMs = (currentTime - _lastCheckTime).TotalMilliseconds;
+            var cpuDelta = (cpuNow - _lastCpu).TotalMilliseconds;
+            var wallTime = (now - _lastCheck).TotalMilliseconds;
 
-            _lastCpuTime = currentCpuTime;
-            _lastCheckTime = currentTime;
+            _lastCpu = cpuNow;
+            _lastCheck = now;
 
-            int processorCount = Environment.ProcessorCount;
+            return Math.Round((cpuDelta / (wallTime * Environment.ProcessorCount)) * 100, 2);
+        }
 
-            return Math.Round((cpuUsedMs / (elapsedMs * processorCount)) * 100, 2);
+        private void SafeCollect()
+        {
+            try
+            {
+                Collect();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[Vigil.Metrics] Failed during collection");
+            }
         }
     }
 }
