@@ -20,12 +20,9 @@ namespace VigilAgent.Api.Commons
     }
     public class TaskContext
     {       
-        public string Message { get; set; }
-        
-        public string ContextId { get; set; } 
-        
+        public string Message { get; set; }        
+        public string ContextId { get; set; }         
         public string? TaskId { get; set; }
-
         public string MessageId { get; set; }
         public string UserId { get; set; }
         public string OrgId { get; set; }

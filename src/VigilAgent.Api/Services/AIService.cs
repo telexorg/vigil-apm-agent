@@ -6,11 +6,11 @@ using VigilAgent.Api.Helpers;
 using VigilAgent.Api.Commons;
 using BloggerAgent.Domain.Commons;
 using VigilAgent.Api.Models;
-using VigilAgent.Api.Middleware;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Connectors.Google;
+using VigilAgent.Api.Configuration;
 
 namespace VigilAgent.Api.Services
 {

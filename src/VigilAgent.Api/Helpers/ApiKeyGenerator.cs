@@ -3,26 +3,34 @@ using System.Text;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+using VigilAgent.Api.Commons;
+using MongoDB.Driver;
 
 
 namespace VigilAgent.Api.Helpers
 {
-            
-    public static class ApiKeyManager
-    {
-        private static string _encryptionKey;
-        private static string _hashPepper;
 
-        public static void Configure(IConfiguration config)
+    public class ApiKeyManager : IApiKeyManager
+    {
+        public string EncryptionKey { get; }
+        public string HashPepper { get; }
+
+        public ApiKeyManager(IOptions<ApiSecret> options)
         {
-            _encryptionKey = config["ApiSecrets:EncryptionKey"]
-                             ?? throw new InvalidOperationException("EncryptionKey not configured.");
-            _hashPepper = config["ApiSecrets:ApiKeyPepper"]
-                          ?? throw new InvalidOperationException("ApiKeyPepper not configured.");
+            var value = options.Value;
+
+            EncryptionKey = !string.IsNullOrWhiteSpace(value.EncryptionKey)
+            ? value.EncryptionKey
+            : throw new InvalidOperationException("EncryptionKey is required.");
+
+            HashPepper = !string.IsNullOrWhiteSpace(value.ApiKeyPepper)
+            ? value.ApiKeyPepper
+            : throw new InvalidOperationException("ApiKeyPepper is required.");
         }
 
-        // 🚀 Generate: encrypted payload + suffix
-        public static string GenerateApiKey(string projectId, string orgId)
+
+        public string GenerateApiKey(string projectId, string orgId)
         {
             var payload = $"{projectId}:{orgId}:{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
             var encrypted = EncryptToBase64(payload);
@@ -30,17 +38,17 @@ namespace VigilAgent.Api.Helpers
             return $"{encrypted}.{suffix}";
         }
 
-        // 🔐 Hash with pepper
-        public static string HashApiKey(string rawKey)
+
+        public string HashApiKey(string rawKey)
         {
             using var sha = SHA256.Create();
-            var bytes = Encoding.UTF8.GetBytes(rawKey + _hashPepper);
+            var bytes = Encoding.UTF8.GetBytes(rawKey + HashPepper);
             var hash = sha.ComputeHash(bytes);
             return Convert.ToHexString(hash);
         }
 
-        // ✅ Validate key against stored hash
-        public static bool Validate(string inputKey, string storedHash)
+
+        public bool Validate(string inputKey, string storedHash)
         {
             var hash = HashApiKey(inputKey);
             return CryptographicOperations.FixedTimeEquals(
@@ -49,8 +57,8 @@ namespace VigilAgent.Api.Helpers
             );
         }
 
-        // 🧠 Extract org + project from key
-        public static (string projectId, string orgId)? ExtractIds(string apiKey)
+
+        public (string projectId, string orgId)? ExtractIds(string apiKey)
         {
             var parts = apiKey.Split('.');
             if (parts.Length != 2) return null;
@@ -68,11 +76,11 @@ namespace VigilAgent.Api.Helpers
             }
         }
 
-        // 🔒 Encryption + base64
-        private static string EncryptToBase64(string plaintext)
+
+        private string EncryptToBase64(string plaintext)
         {
             using var aes = Aes.Create();
-            aes.Key = Encoding.UTF8.GetBytes(_encryptionKey.PadRight(32)[..32]);
+            aes.Key = SHA256.HashData(Encoding.UTF8.GetBytes(EncryptionKey));
             aes.GenerateIV();
 
             using var encryptor = aes.CreateEncryptor();
@@ -86,13 +94,13 @@ namespace VigilAgent.Api.Helpers
             return Convert.ToBase64String(result);
         }
 
-        // 🔓 Decryption from base64 input
-        private static string DecryptFromBase64(string encryptedText)
+
+        private string DecryptFromBase64(string encryptedText)
         {
             var fullCipher = Convert.FromBase64String(encryptedText);
 
             using var aes = Aes.Create();
-            aes.Key = Encoding.UTF8.GetBytes(_encryptionKey.PadRight(32)[..32]);
+            aes.Key = SHA256.HashData(Encoding.UTF8.GetBytes(EncryptionKey));
 
             var iv = new byte[16];
             var cipher = new byte[fullCipher.Length - iv.Length];

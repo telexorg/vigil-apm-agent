@@ -24,8 +24,18 @@ namespace VigilAgent.Api.Middleware
                 context.Request.EnableBuffering();
 
                 var request = context.Request;
-                var headers = JsonSerializer.Serialize(request.Headers.ToDictionary(headers => headers.Key, headers => headers.Value.ToString()), new JsonSerializerOptions { WriteIndented = true });
-                var queryParams = JsonSerializer.Serialize(request.Query.ToDictionary(query => query.Key, query => query.Value.ToString()), new JsonSerializerOptions { WriteIndented = true });
+
+                var headers = JsonSerializer.Serialize(request.Headers.ToDictionary(
+                    headers => headers.Key,
+                    headers => headers.Value.ToString()), 
+                    new JsonSerializerOptions { WriteIndented = true }
+                    );
+
+                var queryParams = JsonSerializer.Serialize(request.Query.ToDictionary(
+                    query => query.Key, 
+                    query => query.Value.ToString()), 
+                    new JsonSerializerOptions { WriteIndented = true }
+                    );
             
                 string body = "";
                 if (request.Body.CanRead)
@@ -42,7 +52,6 @@ namespace VigilAgent.Api.Middleware
                 {
                     if (!string.IsNullOrWhiteSpace(body))
                     {
-
 
                         using var jsonDoc = JsonDocument.Parse(body);
                         formattedBody = JsonSerializer.Serialize(jsonDoc, new JsonSerializerOptions { WriteIndented = true });
@@ -61,6 +70,7 @@ namespace VigilAgent.Api.Middleware
                                 PropertyNameCaseInsensitive = true
                             });
                             var telemetryTask = DataExtract.ExtractTaskData(requestBody); // your helper method
+
                             var taskContext = new TaskContext
                             {
                                 OrgId = telemetryTask.OrgId,
@@ -78,16 +88,14 @@ namespace VigilAgent.Api.Middleware
                 }
                 catch (JsonException ex)
                 {
-                    _logger.LogError(ex, "❌ JSON Parsing Error - Malformed request body. Logging raw body.");
+                    _logger.LogError(ex, "JSON Parsing Error - Malformed request body. Logging raw body.");
                 }
-
-               
 
                 await _next(context);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "❌ Exception in RequestLoggingMiddleware");
+                _logger.LogError(ex, "Exception in RequestLoggingMiddleware");
                 throw;
             }           
         }

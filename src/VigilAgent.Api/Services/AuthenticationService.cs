@@ -9,10 +9,12 @@ namespace VigilAgent.Api.Services
     public class AuthenticationService : IAuthenticationService
     {
         private readonly IMongoRepository<Project> _projects;
+        private readonly IApiKeyManager _apiKeyManager;
 
-        public AuthenticationService(IMongoRepository<Project> projects)
+        public AuthenticationService(IMongoRepository<Project> projects, IApiKeyManager apiKeyManager)
         {
             _projects = projects;
+            _apiKeyManager = apiKeyManager;
         }
 
         public async Task<(bool isConflict, Project created, string rawApiKey)> RegisterProjectAsync(ProjectRegistrationRequest request)
@@ -25,8 +27,8 @@ namespace VigilAgent.Api.Services
                 return (true, null, null);
 
             var projectId = $"proj_{Guid.NewGuid():N}"[..8];
-            var apiKey = ApiKeyManager.GenerateApiKey(projectId, request.OrgId);
-            var hash = ApiKeyManager.HashApiKey(apiKey);
+            var apiKey = _apiKeyManager.GenerateApiKey(projectId, request.OrgId);
+            var hash = _apiKeyManager.HashApiKey(apiKey);
 
             var project = new Project
             {
