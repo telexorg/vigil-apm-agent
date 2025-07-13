@@ -4,6 +4,16 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+	<PackageId>Vigil.Apm.Agent</PackageId>
+	<Version>1.0.0</Version>
+	<Authors>Fabian Muoghalu</Authors>
+	<Description>An AI  Monitoring Agent SDK which collects your systems telemetry and provide you insights and recommendations on your system performance and behaviours through Telex</Description>
+	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<Title>Vigil Monitoring Agent</Title>
+	<PackageTags>Apm, Monitoring, Agent, Vigil, Telemetry</PackageTags>
+	<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	<PackAsTool>False</PackAsTool>
+	<RepositoryUrl>https://github.com/telexorg/vigil-apm-agent/tree/main/src/VigilAgent.Apm</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>

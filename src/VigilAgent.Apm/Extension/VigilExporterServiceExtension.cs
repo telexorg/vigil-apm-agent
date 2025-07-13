@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 using VigilAgent.Apm.Processing;
 using VigilAgent.Apm.Instrumentation;
 
-namespace VigilAgent.Apm.Middleware
+namespace VigilAgent.Apm.Extension
 {
     public static class VigilExporterServiceExtension
     {
