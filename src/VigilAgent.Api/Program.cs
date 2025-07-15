@@ -10,7 +10,7 @@ using VigilAgent.Api.IServices;
 using VigilAgent.Api.Middleware;
 using VigilAgent.Api.Repositories;
 using VigilAgent.Api.Services;
-using VigilAgent.Apm.Middleware;
+using VigilAgent.Apm.Extension;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +33,7 @@ builder.Services.AddCors(options =>
                .AllowAnyMethod();
     });
 });
+builder.Services.AddApplicationInsightsTelemetry();
 
 
 var app = builder.Build();
@@ -52,7 +53,7 @@ app.UseCors("AllowAnyOrigin");
 app.UseMiddleware<ExceptionHandler>();
 app.UseMiddleware<RequestHandler>();
 
-app.UseVigilTelemetry();
+app.UseVigilTelemetryCollector();
 
 app.UseWhen(ctx =>
     ctx.Request.Path.StartsWithSegments(

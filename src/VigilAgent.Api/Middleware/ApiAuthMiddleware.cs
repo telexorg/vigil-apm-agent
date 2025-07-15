@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
-using VigilAgent.Api.IServices;
+using VigilAgent.Api.Contracts;
 
 namespace VigilAgent.Api.Middleware;
 

@@ -1,6 +1,6 @@
 ﻿using VigilAgent.Api.Models;
 
-namespace VigilAgent.Api.IServices
+namespace VigilAgent.Api.Contracts
 {
     public interface IApiKeyValidator
     {

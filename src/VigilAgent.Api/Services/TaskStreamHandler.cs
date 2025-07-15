@@ -1,4 +1,5 @@
-﻿using VigilAgent.Api.IServices;
+﻿using VigilAgent.Api.Contracts;
+using VigilAgent.Api.IServices;
 
 namespace VigilAgent.Api.Services
 {

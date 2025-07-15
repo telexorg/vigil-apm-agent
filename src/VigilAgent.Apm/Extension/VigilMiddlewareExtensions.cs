@@ -13,7 +13,7 @@ namespace VigilAgent.Apm.Extension
 {
     public static class VigilMiddlewareExtensions
     {
-        public static IApplicationBuilder UseVigilTelemetry(this IApplicationBuilder app)
+        public static IApplicationBuilder UseVigilTelemetryCollector(this IApplicationBuilder app)
         {
             // 1. Register the middleware
             app.UseMiddleware<VigilMiddleware>();
@@ -32,8 +32,7 @@ namespace VigilAgent.Apm.Extension
             var flusher = serviceProvider.GetRequiredService<ITelemetryFlusher>();
             var metrics = serviceProvider.GetRequiredService<MetricsCollector>();
                 
-               metrics.Start();
-
+            metrics.Start();
             flusher.Start();
         }
 

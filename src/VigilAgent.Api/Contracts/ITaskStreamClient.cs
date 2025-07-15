@@ -1,6 +1,6 @@
 ﻿using System.Net.WebSockets;
 
-namespace VigilAgent.Api.IServices
+namespace VigilAgent.Api.Contracts
 {
     public interface ITaskStreamClient : IAsyncDisposable
     {

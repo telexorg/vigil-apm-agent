@@ -11,7 +11,7 @@ namespace VigilAgent.Apm.Config
                 FlushIntervalMs = GetInt("VIGIL_FLUSH_INTERVAL_MS", 5000),
                 MaxBatchSize = GetInt("VIGIL_MAX_BATCH_SIZE", 10),
                 ApiKey = GetEnv("VIGIL_API_KEY", null),
-                ServiceName = GetEnv("VIGIL_SERVICE_NAME", "default-service"),
+                ProjectName = GetEnv("VIGIL_SERVICE_NAME", "default-service"),
                 Environment = GetEnv("VIGIL_ENVIRONMENT", "development"),
                 EnableRuntimeMetrics = GetBool("VIGIL_ENABLE_METRICS", true),
                 EnableExceptionLogging = GetBool("VIGIL_ENABLE_EXCEPTIONS", true),

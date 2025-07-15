@@ -1,6 +1,6 @@
-﻿using VigilAgent.Api.Helpers;
+﻿using VigilAgent.Api.Contracts;
+using VigilAgent.Api.Helpers;
 using VigilAgent.Api.IRepositories;
-using VigilAgent.Api.IServices;
 using VigilAgent.Api.Models;
 
 namespace VigilAgent.Api.Services

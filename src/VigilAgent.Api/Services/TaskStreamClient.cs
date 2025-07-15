@@ -2,7 +2,7 @@
 using System.Net.WebSockets;
 using System.Text;
 using VigilAgent.Api.Commons;
-using VigilAgent.Api.IServices;
+using VigilAgent.Api.Contracts;
 
 namespace VigilAgent.Api.Services
 {

@@ -1,5 +1,6 @@
 ﻿using VigilAgent.Api.Commons;
 using VigilAgent.Api.Configuration;
+using VigilAgent.Api.Contracts;
 using VigilAgent.Api.Data;
 using VigilAgent.Api.Helpers;
 using VigilAgent.Api.IRepositories;
@@ -43,7 +44,7 @@ namespace VigilAgent.Api.Extension
             services.AddScoped<IApiKeyValidator, ApiKeyValidator>();
             services.AddScoped<ITaskStreamHandler, TaskStreamHandler>();
 
-            services.AddTelemetryExporter(configuration);
+            //services.AddTelemetryExporter(configuration);
 
 
             var configRoot = (IConfigurationRoot)configuration;

@@ -10,7 +10,7 @@ using VigilAgent.Apm.Telemetry;
 
 namespace VigilAgent.Apm.Middleware
 {
-    public class VigilMiddleware
+    public class VigilMiddleware 
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<VigilMiddleware> _logger;
@@ -74,7 +74,7 @@ namespace VigilAgent.Apm.Middleware
                 };
 
                 await _telemetryBuffer.AddAsync(error);
-                _logger.LogWarning(ex, "[Vigil] [{TraceId}] error {Method} {Path} -> {StatusCode}", traceId, method, path, status);
+                _logger.LogWarning(ex, "[Vigil] error - [{TraceId}]  {Method} {Path} -> {StatusCode}", traceId, method, path, status);
 
                 throw; // Let ASP.NET handle the actual error rendering
             }
@@ -98,7 +98,7 @@ namespace VigilAgent.Apm.Middleware
 
                 await _telemetryBuffer.AddAsync(traceEvent);
 
-                _logger.LogInformation("[Vigil] [{TraceId}] {Method} {Path} -> {StatusCode} in {Duration}ms",
+                _logger.LogInformation("[Vigil] trace - [{TraceId}] {Method} {Path} -> {StatusCode} in {Duration}ms",
                     traceId, method, path, statusCode, duration);
 
                 TraceContext.Clear();
