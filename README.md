@@ -1,6 +1,6 @@
 # VigilAgent SDK for .NET
 
-🚀 What is VigilAgent?
+## 🚀 What is VigilAgent?
 
 VigilAgent is a combination of a C# SDK and a hosted telemetry API. Together, they work to monitor and analyze the behavior of your backend services in real time.
 
@@ -9,7 +9,7 @@ VigilAgent is a combination of a C# SDK and a hosted telemetry API. Together, th
 
 VigilAgent is designed to help developers observe, diagnose, and understand what their backend services are doing—without requiring complex setup.
 
-Key features:
+### Key features:
 
 * Runtime performance metrics (CPU, memory, garbage collection)
 * Project-aware telemetry submission
@@ -21,7 +21,7 @@ Key features:
 
 ---
 
-⚙️ 2. Installation & Setup
+## ⚙️ 2. Installation & Setup
 
 To add VigilAgent to your C# backend project, follow these steps:
 
@@ -85,7 +85,7 @@ Unless customized, VigilAgent will:
 
 ---
 
-🛠️ 3. Middleware Activation
+## 🛠️ 3. Middleware Activation
 
 For telemetry collection and export to work, you must add the VigilAgent middleware to your application’s pipeline. Without it, no request tracing, error logging, or runtime metrics will be captured.
 
@@ -115,7 +115,7 @@ These options are customizable, but the middleware itself is the gateway that ma
 
 ---
 
-🔐 4. API Key Authentication
+## 🔐 4. API Key Authentication
 
 To securely transmit and associate telemetry data with your project, VigilAgent requires an API key.
 
@@ -126,7 +126,21 @@ The key is used by both:
 
 🧭 **Where to Get Your API Key**
 
-* API keys are issued through the Vigil platform.
+At the moment, API keys are issued through an http client like Postman using this URL
+
+```
+https://vigil-apm-agent.onrender.com/api/v1/auth/register-project
+```
+
+To get your API key, make a post request to the above url with your Telex Organization ID and your Project Name. As shown below
+
+```json
+{
+    orgId: "127857",
+    projectName: "traidr",
+    description: "An e-commerce app" // optional
+}
+```
 * Each key is linked to a specific organization and project.
 * Use a separate key for each service if you want isolated tracking.
 
@@ -150,7 +164,7 @@ Always make sure your API key is set correctly in configuration. If no key is pr
 
 ---
 
-🏁 5. What Happens Next
+## 🏁 5. What Happens Next
 
 Once VigilAgent is installed in your C# backend and you've added the middleware, telemetry will begin flowing to the Vigil API in the background.
 

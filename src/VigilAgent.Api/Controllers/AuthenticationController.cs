@@ -10,7 +10,7 @@ using VigilAgent.Api.IServices;
 namespace VigilAgent.Api.Controllers
 { 
 
-    [Route("api/[controller]")]
+    [Route("api/auth")]
     [ApiController]
     public class AuthenticationController : ControllerBase
     {
@@ -25,7 +25,7 @@ namespace VigilAgent.Api.Controllers
             _config = config;
         }
 
-        [HttpPost("register")]
+        [HttpPost("register-project")]
         public async Task<IActionResult> RegisterProject([FromBody] ProjectRegistrationRequest request)
         {
             var (isConflict, created, apiKey) = await _service.RegisterProjectAsync(request);
@@ -41,18 +41,18 @@ namespace VigilAgent.Api.Controllers
              
 
 
-        [HttpGet("config")]
-        public IActionResult GetConfig()
-        {
-            var result = new Dictionary<string, string?>
-        {
-            { "ASPNETCORE_ENVIRONMENT", Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") },
-            { "MySettings:ApiKey", _config["MySettings:ApiKey"] }, // sanitize or remove if sensitive
-            { "ConnectionStrings:DefaultConnection", _config.GetConnectionString("DefaultConnection") }
-        };
+        //[HttpGet("config")]
+        //public IActionResult GetConfig()
+        //{
+        //    var result = new Dictionary<string, string?>
+        //{
+        //    { "ASPNETCORE_ENVIRONMENT", Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") },
+        //    { "MySettings:ApiKey", _config["MySettings:ApiKey"] }, // sanitize or remove if sensitive
+        //    { "ConnectionStrings:DefaultConnection", _config.GetConnectionString("DefaultConnection") }
+        //};
 
-            return Ok(result);
-        }
+        //    return Ok(result);
+        //}
     }
 
 }
