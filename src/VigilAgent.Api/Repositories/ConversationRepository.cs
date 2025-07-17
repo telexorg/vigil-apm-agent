@@ -43,7 +43,7 @@ namespace VigilAgent.Api.Repositories
         }
 
 
-        public async Task<bool> AddMessageAsync(string message, TelemetryTask task, string role)
+        public async Task<bool> AddMessageAsync(string message, TaskContext task, string role)
         {
             var newMessage = new Message
             {

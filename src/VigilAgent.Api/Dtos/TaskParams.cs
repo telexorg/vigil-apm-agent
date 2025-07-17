@@ -27,7 +27,7 @@ namespace VigilAgent.Api.Dtos
 
     public class MessagePart
     {
-        public string Type { get; set; }   // e.g., "text"
+        public string Kind { get; set; }   // e.g., "text"
         public string Text { get; set; }
         public Dictionary<string, object>? Metadata { get; set; }
     }

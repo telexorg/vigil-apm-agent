@@ -22,7 +22,7 @@ namespace VigilAgent.Api.Services
             _httpHelper = httpHelper;
         }
 
-        public async Task<bool> SendResponseAsync(string taskResponse, TelemetryTask taskRequest)
+        public async Task<bool> SendResponseAsync(string taskResponse, TaskContext taskRequest)
         {
 
             if (string.IsNullOrEmpty(taskRequest.ContextId) || string.IsNullOrEmpty(_webhookUrl))

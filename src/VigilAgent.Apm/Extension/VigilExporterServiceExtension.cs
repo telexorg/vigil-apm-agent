@@ -15,9 +15,9 @@ namespace VigilAgent.Apm.Extension
         public static IServiceCollection AddTelemetryExporter(this IServiceCollection services, Action<TelemetryOptions> configureOptions)
         {
             services.Configure(configureOptions); // registers via IOptions<T>
+            services.AddSingleton<ITelemetryFlusher,TelemetryFlusher>();
             services.AddHttpClient<ITelemetryClient, TelemetryClient>(); // your custom class
             services.AddSingleton<MetricsCollector>();
-            services.AddSingleton<ITelemetryFlusher,TelemetryFlusher>();
             services.AddSingleton<TelemetryBuffer>();
             return services;
         }
@@ -48,8 +48,8 @@ namespace VigilAgent.Apm.Extension
             // Register options as singleton
             services.AddSingleton(telemetryOptions);
             services.AddHttpClient<ITelemetryClient, TelemetryClient>();
-            services.AddSingleton<MetricsCollector>();
             services.AddSingleton<ITelemetryFlusher,TelemetryFlusher>();
+            services.AddSingleton<MetricsCollector>();
             services.AddSingleton<TelemetryBuffer>();
 
             return services;

@@ -9,11 +9,11 @@ namespace VigilAgent.Api.IServices
 {
     public interface IAIService
     {
-        Task<string> GenerateResponse(string message, string systemMessage, TelemetryTask taskRequest);
-        Task<string> Chat(string request, string responseContext, TelemetryTask taskRequest = null);
+        Task<string> GenerateResponse(string message, string systemMessage, TaskContext taskRequest);
+        Task<string> Chat(string request, string responseContext, TaskContext taskRequest = null);
         Task<string> GetIntentAsync(string message);
-        Task<string> ChatWithHistoryAsync(TelemetryTask taskRequest);
+        Task<string> ChatWithHistoryAsync(TaskContext taskRequest);
 
-        Task<string> ChatWithTools(TelemetryTask taskRequest);
+        Task<string> ChatWithTools(TaskContext taskRequest);
     }
 }

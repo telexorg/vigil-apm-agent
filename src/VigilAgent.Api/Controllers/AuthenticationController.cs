@@ -10,7 +10,7 @@ using VigilAgent.Api.IServices;
 namespace VigilAgent.Api.Controllers
 { 
 
-    [Route("api/auth")]
+    [Route("api/v1/auth")]
     [ApiController]
     public class AuthenticationController : ControllerBase
     {

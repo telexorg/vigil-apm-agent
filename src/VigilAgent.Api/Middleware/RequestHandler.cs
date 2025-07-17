@@ -71,17 +71,8 @@ namespace VigilAgent.Api.Middleware
                             });
                             var telemetryTask = DataExtract.ExtractTaskData(requestBody); // your helper method
 
-                            var taskContext = new TaskContext
-                            {
-                                OrgId = telemetryTask.OrgId,
-                                Message = telemetryTask.Message,
-                                TaskId = telemetryTask.TaskId,
-                                ContextId = telemetryTask.ContextId,
-                                MessageId = telemetryTask.MessageId,
-                                Settings = telemetryTask.Settings
-                            };
-
-                            context.Items["TaskContext"] = taskContext;
+                           if (telemetryTask != null) 
+                             context.Items["TaskContext"] = telemetryTask;
 
                         }
                     }

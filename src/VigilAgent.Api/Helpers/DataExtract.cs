@@ -26,7 +26,7 @@ namespace VigilAgent.Api.Helpers
             return generatedResponse;
         }
 
-        public Organization ExtractCompanyDetails(TelemetryTask blogDto)
+        public Organization ExtractCompanyDetails(TaskContext blogDto)
         {
 
             // Retrieve settings dynamically
@@ -78,27 +78,34 @@ namespace VigilAgent.Api.Helpers
             };
         }
 
-        public static TelemetryTask ExtractTaskData(TaskRequest request)
+         public static TaskContext ExtractTaskData(TaskRequest request)
         {
             var message = request?.Params?.Message;
+            var config = request?.Params?.Configuration;
+            var pushConfig = config?.PushNotificationConfig;
+            var metadata = message?.Metadata ?? new Dictionary<string, object>();
 
             if (message == null || message.Parts == null || !message.Parts.Any())
                 throw new ArgumentException("Invalid message structure");
 
-            return new TelemetryTask
+            return new TaskContext
             {
-                Message = message.Parts.First().Text,
-                ContextId = message.ContextId,
+                Message = message.Parts.First().Text ?? string.Empty,
+                ContextId = message.ContextId ?? string.Empty,
                 TaskId = message.TaskId,
-                MessageId = message.MessageId,
-                OrgId = request.Params.Metadata != null &&
-                 request.Params.Metadata.TryGetValue("org_id", out var org)
-                 ? org?.ToString()
-                 : null,
-                Settings = request.Params.Metadata != null &&
-                           request.Params.Metadata.TryGetValue("settings", out var settingsObj)
-                           ? JsonSerializer.Deserialize<List<Setting>>(settingsObj.ToString())
-                           : new List<Setting>()
+                MessageId = message.MessageId ?? string.Empty,
+                OrgId = metadata.TryGetValue("org_id", out var org) ? org?.ToString() ?? string.Empty : string.Empty,
+                UserId = metadata.TryGetValue("telex_user_id", out var user) ? user?.ToString() ?? string.Empty : string.Empty,
+                ChannelId = metadata.TryGetValue("telex_channel_id", out var channel) ? channel?.ToString() ?? string.Empty : string.Empty,
+                Settings = metadata.TryGetValue("settings", out var settingsObj) && settingsObj != null
+                           ? JsonSerializer.Deserialize<List<Setting>>(settingsObj.ToString()!) ?? new List<Setting>()
+                           : new List<Setting>(),
+
+                AcceptedOutputModes = config?.AcceptedOutputModes ?? new List<string>(),
+                CallbackUrl = pushConfig?.Url ?? string.Empty,
+                AuthToken = pushConfig?.Authentication?.Credentials ?? string.Empty,
+                HistoryLength = config?.HistoryLength ?? 0,
+                IsBlocking = config?.Blocking ?? false
             };
         }
     }

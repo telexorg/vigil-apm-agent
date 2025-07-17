@@ -1,16 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Polly;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using VigilAgent.Apm.Config;
-using VigilAgent.Apm.Telemetry;
 using VigilAgent.Apm.Utils;
+using System.Net;
 
 namespace VigilAgent.Apm.Processing
 {
@@ -30,20 +25,23 @@ namespace VigilAgent.Apm.Processing
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
             var config = options?.Value ?? throw new ArgumentNullException(nameof(options));
+
             _apiKey = !string.IsNullOrWhiteSpace(config.ApiKey) ? config.ApiKey
                     : throw new ArgumentException("API key is missing.");
+
             var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ??"Production";
 
             _endPoint = env == "Development" ? "https://localhost:7116/api/v1/Telemetry" : TelemetryOptions.TelemetryEndpoint;
 
             _retryPolicy = Policy
-                   .HandleResult<HttpResponseMessage>(r => !r.IsSuccessStatusCode)
+                   .HandleResult<HttpResponseMessage>(r => !r.IsSuccessStatusCode || r.StatusCode != HttpStatusCode.Unauthorized)
                    .WaitAndRetryAsync(3, attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt)),
                        (outcome, delay, attempt, _) =>
                        {
                            _logger.LogWarning("Retry {Attempt} after {Delay} due to {StatusCode}",
-                   attempt, delay, outcome.Result?.StatusCode);
-           });
+                           attempt, delay, outcome.Result?.StatusCode);
+                       }
+                   );
 
         }
 
@@ -75,6 +73,11 @@ namespace VigilAgent.Apm.Processing
                 {
                     _logger.LogWarning("Telemetry send failed: {Code} - {Reason}",
                         (int)response.StatusCode, response.ReasonPhrase);
+
+                    if (response.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        _logger.LogWarning("Please check your API that key is valid or request for a new one");
+                    }
                     return false;
                 }
             }

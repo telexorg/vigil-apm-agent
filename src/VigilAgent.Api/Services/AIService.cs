@@ -11,6 +11,7 @@ using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Connectors.Google;
 using VigilAgent.Api.Configuration;
+using System.Text.Json;
 
 namespace VigilAgent.Api.Services
 {
@@ -22,11 +23,12 @@ namespace VigilAgent.Api.Services
         private readonly IConversationRepository _messageRepository;
         private readonly HttpHelper _httpHelper;
         private readonly IMongoRepository<Message> _repository;
+        private readonly IMongoRepository<Project> _projectrepository;
 
         private readonly KernelProvider _kernelProvider;
 
      
-        public AIService(IOptions<TelexApiSettings> dataConfig, KernelProvider kernelProvider, IOptions<TelexApiSettings> telexSettings, ILogger<VigilAgentService> logger, IConversationRepository messageRepository, HttpHelper httpHelper, IMongoRepository<Message> repository)
+        public AIService(IOptions<TelexApiSettings> dataConfig, KernelProvider kernelProvider, IOptions<TelexApiSettings> telexSettings, ILogger<VigilAgentService> logger, IConversationRepository messageRepository, HttpHelper httpHelper, IMongoRepository<Message> repository, IMongoRepository<Project> projectrepository)
         {
             _apiKey = dataConfig.Value.ApiKey;
             _baseUrl = dataConfig.Value.BaseUrl;
@@ -35,6 +37,7 @@ namespace VigilAgent.Api.Services
             _httpHelper = httpHelper;
             _kernelProvider = kernelProvider;
             _repository = repository;
+            _projectrepository = projectrepository;
         }
 
 
@@ -70,7 +73,7 @@ namespace VigilAgent.Api.Services
         }
 
 
-        public async Task<string> ChatWithHistoryAsync(TelemetryTask taskRequest)
+        public async Task<string> ChatWithHistoryAsync(TaskContext taskRequest)
         {
             try
             {
@@ -129,7 +132,7 @@ namespace VigilAgent.Api.Services
 
 
 
-        public async Task<string> ChatWithTools(TelemetryTask taskRequest)
+        public async Task<string> ChatWithTools(TaskContext taskRequest)
         {
             try
             {
@@ -150,8 +153,17 @@ namespace VigilAgent.Api.Services
 
                 var history = new ChatHistory();
 
+                List<Project> projects = await _projectrepository.GetAllAsync(p => p.OrgId == taskRequest.OrgId);
+
+                object projectData = projects.Select(p => new { p.ProjectName, ProjectId = p.Id, p.CreatedAt }).ToList();
+
+                string serializedData = default;
+
+                if (projectData != null)
+                    JsonSerializer.Serialize(serializedData);
+
                 // Add system message to guide the assistant
-                history.AddSystemMessage(PromptBuilder.BuildSystemToolingMessage());
+                history.AddSystemMessage(PromptBuilder.BuildSystemToolingMessage(serializedData));
 
                 //// Add prior conversation messages
                 //history.AddRange(orderedMessages.Select(m => new ChatMessageContent()
@@ -193,7 +205,7 @@ namespace VigilAgent.Api.Services
 
 
 
-        public async Task<string> Chat(string request, string responseContext, TelemetryTask? taskRequest = null)
+        public async Task<string> Chat(string request, string responseContext, TaskContext? taskRequest = null)
         {
             try
             {
@@ -257,7 +269,7 @@ namespace VigilAgent.Api.Services
         }
 
 
-        public async Task<string> GenerateResponse(string message, string systemMessage, TelemetryTask task)
+        public async Task<string> GenerateResponse(string message, string systemMessage, TaskContext task)
         {            
             await _messageRepository.AddMessageAsync(message, task, "user");
 

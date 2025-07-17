@@ -7,6 +7,7 @@ using VigilAgent.Api.IRepositories;
 using VigilAgent.Api.IServices;
 using VigilAgent.Api.Repositories;
 using VigilAgent.Api.Services;
+using VigilAgent.Apm.Extension;
 using VigilAgent.Apm.Middleware;
 
 namespace VigilAgent.Api.Extension
@@ -20,9 +21,9 @@ namespace VigilAgent.Api.Extension
             services.Configure<MongoOptions>(configuration.GetSection("Mongo"));
             services.Configure<ApiSecret>(configuration.GetSection("ApiSecrets"));
             services.Configure<TelexApiSettings>(configuration.GetSection("TelexApiSettings"));
-
+            services.AddTelemetryExporter(configuration);
             services.AddHttpContextAccessor();
-
+            services.AddHttpClient(); 
             services.AddSingleton<MongoDbContext>();
             services.AddSingleton<TelemetryFunctions>();
             services.AddSingleton<IApiKeyManager, ApiKeyManager>();

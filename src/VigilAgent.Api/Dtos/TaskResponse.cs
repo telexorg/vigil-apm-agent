@@ -35,7 +35,7 @@ namespace VigilAgent.Api.Dtos
                            {
                                new MessagePart
                                {
-                                   Type = "text",
+                                   Kind = "text",
                                    Text = "Task completed with an artifact.",
                                    Metadata = null
                                }

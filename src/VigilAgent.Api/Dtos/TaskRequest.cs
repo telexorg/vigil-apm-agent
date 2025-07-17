@@ -31,7 +31,7 @@ namespace VigilAgent.Api.Dtos
                         {
                             new MessagePart
                             {
-                                Type = "text",
+                                Kind = "text",
                                 Text = "Hello",
                                 Metadata = null
                             }
