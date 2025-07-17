@@ -34,6 +34,7 @@ namespace VigilAgent.Api.Services
             {
                 Id = projectId,
                 ProjectName = request.ProjectName,
+                Description = request.Description,
                 OrgId = request.OrgId,
                 ApiKey = hash,
                 CreatedAt = DateTime.UtcNow
