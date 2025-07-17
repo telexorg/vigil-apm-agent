@@ -34,7 +34,7 @@ namespace VigilAgent.Apm.Processing
             _endPoint = env == "Development" ? "https://localhost:7116/api/v1/Telemetry" : TelemetryOptions.TelemetryEndpoint;
 
             _retryPolicy = Policy
-                   .HandleResult<HttpResponseMessage>(r => !r.IsSuccessStatusCode && r.StatusCode == HttpStatusCode.Unauthorized)
+                   .HandleResult<HttpResponseMessage>(r => !r.IsSuccessStatusCode && r.StatusCode != HttpStatusCode.Unauthorized)
                    .WaitAndRetryAsync(3, attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt)),
                        (outcome, delay, attempt, _) =>
                        {
