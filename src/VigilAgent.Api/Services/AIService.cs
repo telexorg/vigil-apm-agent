@@ -136,22 +136,22 @@ namespace VigilAgent.Api.Services
         {
             try
             {
-                var kernel = _kernelProvider.Kernel;
-                var chatService = _kernelProvider.ChatCompletionService;
+                Kernel kernel = _kernelProvider.Kernel;
+                IChatCompletionService chatService = _kernelProvider.ChatCompletionService;
 
                 // Save AI reply (optional)
                 await _repository.Create(new Message
                 {
                     ContextId = taskRequest.ContextId,
                     Content = taskRequest.Message,
-                    Role = Roles.Assistant,
+                    Role = Roles.User,
                     TaskId = taskRequest.TaskId,
                 });
 
-                //var previousMessages = await _repository.GetLastNAsync(m => m.ContextId == taskRequest.ContextId, 10);
-                //var orderedMessages = previousMessages.OrderBy(m => m.Timestamp).ToList();
+                List<Message> previousMessages = await _repository.GetLastNAsync(m => m.ContextId == taskRequest.ContextId, 10);
+                List<Message> orderedMessages = previousMessages.OrderBy(m => m.Timestamp).ToList();
 
-                var history = new ChatHistory();
+                ChatHistory history = new ChatHistory();
 
                 List<Project> projects = await _projectrepository.GetAllAsync(p => p.OrgId == taskRequest.OrgId);
 
@@ -160,17 +160,18 @@ namespace VigilAgent.Api.Services
                 string serializedData = default;
 
                 if (projectData != null)
-                    JsonSerializer.Serialize(serializedData);
+                    serializedData = JsonSerializer.Serialize(projectData);
 
                 // Add system message to guide the assistant
                 history.AddSystemMessage(PromptBuilder.BuildSystemToolingMessage(serializedData));
 
-                //// Add prior conversation messages
-                //history.AddRange(orderedMessages.Select(m => new ChatMessageContent()
-                //{
-                //    Role = new AuthorRole(m.Role),
-                //    Content = m.Content
-                //}));
+                // Add prior conversation messages
+                history.AddRange(orderedMessages.Select(m => new ChatMessageContent()
+                {
+                    Role = new AuthorRole(m.Role),
+                    Content = m.Content
+                }));
+
                 history.AddUserMessage(taskRequest.Message);
 
                 // Enable Function Calling
