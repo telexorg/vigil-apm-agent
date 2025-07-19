@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VigilAgent.Apm.Contracts;
 using VigilAgent.Apm.Instrumentation;
 using VigilAgent.Apm.Middleware;
-using VigilAgent.Apm.Processing;
 
 namespace VigilAgent.Apm.Extension
 {

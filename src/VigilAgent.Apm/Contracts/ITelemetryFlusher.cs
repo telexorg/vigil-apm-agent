@@ -1,5 +1,4 @@
-﻿
-namespace VigilAgent.Apm.Processing
+﻿namespace VigilAgent.Apm.Contracts
 {
     public interface ITelemetryFlusher : IAsyncDisposable
     {

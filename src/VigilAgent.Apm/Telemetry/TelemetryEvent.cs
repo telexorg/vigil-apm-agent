@@ -12,6 +12,7 @@ namespace VigilAgent.Apm.Telemetry
         public string Type { get; set; }
         public int RetryCount { get; set; } = 0;
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+        public string Environment { get; set; } = System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
     }
 }
 

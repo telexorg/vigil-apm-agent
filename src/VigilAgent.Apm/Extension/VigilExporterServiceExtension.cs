@@ -4,8 +4,8 @@ using VigilAgent.Apm.Processing;
 using Microsoft.Extensions.Configuration;
 
 using Microsoft.Extensions.Options;
-using VigilAgent.Apm.Processing;
 using VigilAgent.Apm.Instrumentation;
+using VigilAgent.Apm.Contracts;
 
 namespace VigilAgent.Apm.Extension
 {

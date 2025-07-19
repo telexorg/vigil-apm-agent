@@ -6,6 +6,7 @@ using System.Text.Json;
 using VigilAgent.Apm.Config;
 using VigilAgent.Apm.Utils;
 using System.Net;
+using VigilAgent.Apm.Contracts;
 
 namespace VigilAgent.Apm.Processing
 {
@@ -29,16 +30,14 @@ namespace VigilAgent.Apm.Processing
             _apiKey = !string.IsNullOrWhiteSpace(config.ApiKey) ? config.ApiKey
                     : throw new ArgumentException("API key is missing.");
 
-            var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ??"Production";
-
-            _endPoint = env == "Development" ? "https://localhost:7116/api/v1/Telemetry" : TelemetryOptions.TelemetryEndpoint;
+            _endPoint = TelemetryOptions.TelemetryEndpoint;
 
             _retryPolicy = Policy
                    .HandleResult<HttpResponseMessage>(r => !r.IsSuccessStatusCode && r.StatusCode != HttpStatusCode.Unauthorized)
                    .WaitAndRetryAsync(3, attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt)),
                        (outcome, delay, attempt, _) =>
                        {
-                           _logger.LogWarning("Retry {Attempt} after {Delay} due to {StatusCode}",
+                           _logger.LogWarning("[VigilClient] Retry {Attempt} after {Delay} due to {StatusCode}",
                            attempt, delay, outcome.Result?.StatusCode);
                        }
                    );
@@ -64,27 +63,30 @@ namespace VigilAgent.Apm.Processing
 
             try
             {
-                _logger.LogInformation("Sending telemetry batch: {Count}", events.Count);
+                _logger.LogInformation("[VigilClient] Sending telemetry batch: {Count}", events.Count);
 
                 var response = await _retryPolicy.ExecuteAsync(() =>
                     _httpClient.PostAsync(_endPoint, content));
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    _logger.LogWarning("Telemetry send failed: {Code} - {Reason}",
+                    _logger.LogWarning("[VigilClient] Telemetry send failed: {Code} - {Reason}",
                         (int)response.StatusCode, response.ReasonPhrase);
 
                     if (response.StatusCode == HttpStatusCode.Unauthorized)
                     {
-                        _logger.LogWarning("Please check that your API key is valid or request for a new one");
+                        _logger.LogWarning("[VigilClient] Please check that your API key is valid or request for a new one");
                     }
                     return false;
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Telemetry send permanently failed after retries");
+                _logger.LogError(ex, "[VigilClient] Telemetry send permanently failed after retries");
             }
+
+            _logger.LogInformation("[VigilClient] Telemetry batch successfully sent");
+
             return true;
         }
 

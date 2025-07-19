@@ -1,7 +1,7 @@
 ﻿using Timer = System.Timers.Timer;
 using Microsoft.Extensions.Logging;
-using VigilAgent.Apm.Processing;
 using VigilAgent.Apm.Telemetry;
+using VigilAgent.Apm.Contracts;
 
 namespace VigilAgent.Apm.Processing
 {
