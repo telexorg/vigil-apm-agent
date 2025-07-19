@@ -9,7 +9,7 @@ namespace VigilAgent.Api.Helpers
         {
             var telemetryAgent = new AgentCard()
             {
-                Name = "Vigil APM Agent",
+                Name = "Vigil - Monitoring Agent",
                 Description = "Vigil helps you monitor and analyze your C# .Net backend app by receiving logs, errors, and metrics, then interacting via chat to provide insights and recommendations.",
                 Url = "https://vigil-apm-agent.onrender.com/api/v1", 
                 IconUrl = "https://res.cloudinary.com/demo/image/upload/v1695555555/vigil-icon.png",
