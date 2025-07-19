@@ -137,8 +137,7 @@ To get your API key, make a post request to the above url with your Telex Organi
 ```json
 {
     orgId: "127857",
-    projectName: "traidr",
-    description: "An e-commerce app" // optional
+    projectName: "traidr"
 }
 ```
 * Each key is linked to a specific organization and project.
