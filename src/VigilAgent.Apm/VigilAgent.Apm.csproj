@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	<PackageId>Vigil.Apm.Agent</PackageId>
-	<Version>1.0.0</Version>
+	<Version>1.0.1</Version>
 	<Authors>Fabian Muoghalu</Authors>
 	<Description>An AI  Monitoring Agent SDK which collects your systems telemetry and provide you insights and recommendations on your system performance and behaviours through Telex</Description>
 	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
